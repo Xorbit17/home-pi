@@ -1,0 +1,12 @@
+[project]
+name = "photoframe-django"
+version = "0.1.0"
+dependencies = [
+  "django>=5.0",
+  "uvicorn[standard]>=0.29",
+  "playwright>=1.45",
+  "apscheduler>=3.10",
+]
+
+[tool.black]
+line-length = 100

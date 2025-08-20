@@ -1,0 +1,36 @@
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+  # jellyfin:
+  #   image: jellyfin/jellyfin
+  #   container_name: jellyfin
+  #   network_mode: host
+  #   volumes:
+  #     - /srv/jellyfin/config:/config
+  #     - /srv/jellyfin/cache:/cache
+  #     - /srv/media:/media:ro
+  #   restart: unless-stopped
+
+  # transmission:
+  #   image: linuxserver/transmission
+  #   container_name: transmission
+  #   network_mode: host
+  #   environment:
+  #     - PUID=1000
+  #     - PGID=1000
+  #   volumes:
+  #     - /srv/transmission/config:/config
+  #     - /srv/transmission/downloads:/downloads
+  #     - /srv/transmission/watch:/watch
+  #   restart: unless-stopped
+
+  # Add other lightweight services as needed.

@@ -1,0 +1,37 @@
+# General
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+.env
+.env.*
+.venv/
+venv/
+__pycache__/
+
+# Node / Docker
+node_modules/
+dist/
+build/
+*.local
+
+# Python
+*.pyc
+.mypy_cache/
+.pytype/
+
+# Terraform
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Certificates and keys
+*.crt
+*.key
