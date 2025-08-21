@@ -91,17 +91,55 @@ fi
 # systemctl list-timers --all | grep route53-ddns || true
 # EOS
 
-echo "==> Create systemd service…"
+# echo "==> Create systemd service…"
+# "${SSH[@]}" bash -s <<EOS
+# sudo tee /etc/systemd/system/route53-ddns.service >/dev/null <<'UNIT'
+# [Unit]
+# Description=Fetch weather forecasts
+
+# [Service]
+# Type=oneshot
+# WorkingDirectory=/home/pi/apps/pihome
+# Environment="PATH=/home/pi/apps/pihome/.venv/bin:/usr/bin"
+# ExecStart=/home/pi/apps/pihome/.venv/bin/python manage.py fetch_forecast --location "Blankenberge"
+
+# UNIT
+
+# # Timer (every 5 min)
+# sudo tee /etc/systemd/system/forecast.timer >/dev/null <<'UNIT'
+# [Unit]
+# Description=Run forecast fetch every 8 hours
+
+# [Timer]
+# OnBootSec=5min
+# OnUnitActiveSec=8h
+# Persistent=true
+
+# [Install]
+# WantedBy=timers.target
+# UNIT
+
+# sudo systemctl daemon-reload
+# sudo systemctl enable --now rforecast.timer
+# systemctl list-timers --all | grep forecast.timer || true
+# EOS
+
+
+echo "==> Create cert renewam"
 "${SSH[@]}" bash -s <<EOS
 sudo tee /etc/systemd/system/route53-ddns.service >/dev/null <<'UNIT'
 [Unit]
-Description=Fetch weather forecasts
+Description=Renew Let's Encrypt cert with lego (Route53 DNS-01)
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/home/pi/apps/pihome
-Environment="PATH=/home/pi/apps/pihome/.venv/bin:/usr/bin"
-ExecStart=/home/pi/apps/pihome/.venv/bin/python manage.py fetch_forecast --location "Blankenberge"
+EnvironmentFile=/home/pi/.env.aws
+ExecStart=/home/pi/.ip-cert-updater.sh
+# Run as root to access /etc/lego and docker
+User=root
+Group=root
 
 UNIT
 
@@ -123,4 +161,3 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now rforecast.timer
 systemctl list-timers --all | grep forecast.timer || true
 EOS
-

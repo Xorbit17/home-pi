@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-^_x1hslj(+$oc&uh-ijzo#k0dls&((zv=63gp4_zhz-b+st+nr
 DEBUG = True
 
 ALLOWED_HOSTS = ["raspberrypi","localhost", "dennisvaneecke.be"]
-CSRF_TRUSTED_ORIGINS = ["https://dennisvaneecke.be:8443", "https://raspberrypi:8443"]
+CSRF_TRUSTED_ORIGINS = ["https://dennisvaneecke.be", "https://raspberrypi"]
 
 
 # Application definition

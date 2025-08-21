@@ -20,3 +20,20 @@ sudo systemctl enable --now docker
 # (You may need to log out/in once for the docker group to take effect)
 docker version && docker compose version
 
+lego
+# curl -s https://api.github.com/repos/go-acme/lego/releases/latest \
+#   | grep "browser_download_url.*linux_arm64.tar.gz" \
+#   | cut -d '"' -f 4 \
+#   | wget -i -
+# tar -xzf lego_v*.tar.gz
+# sudo mv lego /usr/local/bin/
+export AWS_ACCESS_KEY_ID=
+export AWS_SECRET_ACCESS_KEY=
+export AWS_REGION=eu-central-1
+export AWS_HOSTED_ZONE_ID=
+lego --email "dennis.vaneecke@gmail.com" \
+     --dns route53 \
+     --domains "dennisvaneecke.be" \
+     --path /etc/lego run \
+
+

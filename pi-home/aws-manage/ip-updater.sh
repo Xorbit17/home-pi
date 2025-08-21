@@ -23,7 +23,7 @@ ensure_time_ok() {
 }
 
 # Load config
-ENV_FILE="./.env.aws"
+ENV_FILE="../.env.aws"
 [[ -f "$ENV_FILE" ]] || { echo "Missing $ENV_FILE"; exit 1; }
 # shellcheck disable=SC1090
 source "$ENV_FILE"
