@@ -62,30 +62,4 @@ set -euo pipefail
 "$PIP_BIN" install -r "$APP_DIR/requirements.txt"
 EOS
 
-echo "==> Create systemd service…"
-"${SSH[@]}" bash -s <<EOS
-set -euo pipefail
-sudo tee /etc/systemd/system/${SERVICE_NAME} >/dev/null <<UNIT
-[Unit]
-Description=Gunicorn for Django pihome
-After=network.target
-
-[Service]
-User=${HOME_PI_USERNAME}
-Group=${HOME_PI_USERNAME}
-WorkingDirectory=${APP_DIR}
-Environment=PATH=${APP_DIR}/.venv/bin
-ExecStart=${GUNICORN_BIN} pihome.wsgi:application --bind 127.0.0.1:8000 --workers 2
-
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-UNIT
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now ${SERVICE_NAME}
-sudo systemctl status ${SERVICE_NAME} --no-pager || true
-EOS
-
 echo "✅ Init complete. Gunicorn should be listening on 127.0.0.1:8000 on the Pi."

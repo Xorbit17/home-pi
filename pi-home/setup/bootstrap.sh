@@ -6,6 +6,7 @@ sudo apt-get upgrade -y || true
 
 # Install Docker (CE) + Compose plugin
 sudo apt-get install -y ca-certificates curl gnupg
+sudo apt-get install -y awscli
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] \

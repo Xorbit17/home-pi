@@ -19,7 +19,9 @@ set +a
 : "${HOME_PI_USERNAME:?missing in .env}"
 
 LOCAL_DOCKER_DIR="${REPO_ROOT}/pi-home/docker"
-DEST_DIR="/home/${HOME_PI_USERNAME}/docker"
+DEST_DOCKER_DIR="/home/${HOME_PI_USERNAME}/docker"
+LOCAL_AWS_DIR="${REPO_ROOT}/pi-home/aws-manage"
+DEST_AWS_DIR="/home/${HOME_PI_USERNAME}/aws-manage"
 
 if [[ ! -d "${LOCAL_DOCKER_DIR}" ]]; then
   echo "ERROR: local docker dir not found: ${LOCAL_DOCKER_DIR}"
@@ -41,8 +43,9 @@ else
 fi
 
 
-echo "==> Syncing ${LOCAL_DOCKER_DIR} → ${HOME_PI_USERNAME}@${HOME_PI_HOST_LOCAL}:${DEST_DIR}"
-eval $RSYNC "${LOCAL_DOCKER_DIR}/" "${HOME_PI_USERNAME}@${HOME_PI_HOST_LOCAL}:${DEST_DIR}/"
+echo "==> Syncing ${LOCAL_DOCKER_DIR} → ${HOME_PI_USERNAME}@${HOME_PI_HOST_LOCAL}:${DEST_DOCKER_DIR}"
+eval $RSYNC "${LOCAL_DOCKER_DIR}/" "${HOME_PI_USERNAME}@${HOME_PI_HOST_LOCAL}:${DEST_DOCKER_DIR}/"
+eval $RSYNC "${LOCAL_AWS_DIR}/" "${HOME_PI_USERNAME}@${HOME_PI_HOST_LOCAL}:${DEST_AWS_DIR}/"
 
 echo "==> Restarting compose on remote"
 $SSH bash -s <<'EOS'
