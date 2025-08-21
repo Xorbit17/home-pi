@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-^_x1hslj(+$oc&uh-ijzo#k0dls&((zv=63gp4_zhz-b+st+nr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["raspberrypi","localhost"]
+ALLOWED_HOSTS = ["raspberrypi","localhost", "dennisvaneecke.be"]
+CSRF_TRUSTED_ORIGINS = ["https://dennisvaneecke.be:8443", "https://raspberrypi:8443"]
 
 
 # Application definition
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'dashboard',
 ]
 
 MIDDLEWARE = [
@@ -120,3 +122,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

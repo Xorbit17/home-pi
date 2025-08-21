@@ -59,27 +59,60 @@ fi
 # sudo systemctl status ${SERVICE_NAME} --no-pager || true
 # EOS
 
+# echo "==> Create systemd service…"
+# "${SSH[@]}" bash -s <<EOS
+# sudo tee /etc/systemd/system/route53-ddns.service >/dev/null <<'UNIT'
+# [Unit]
+# Description=Route53 DDNS updater (IPv4)
+
+# [Service]
+# Type=oneshot
+# EnvironmentFile=/home/pi/.env.aws
+# ExecStart=/home/pi/.ip-updater.sh
+# UNIT
+
+# # Timer (every 5 min)
+# sudo tee /etc/systemd/system/route53-ddns.timer >/dev/null <<'UNIT'
+# [Unit]
+# Description=Run Route53 DDNS updater every 5 minutes
+
+# [Timer]
+# OnBootSec=1min
+# OnUnitActiveSec=5min
+# AccuracySec=30s
+# Persistent=true
+
+# [Install]
+# WantedBy=timers.target
+# UNIT
+
+# sudo systemctl daemon-reload
+# sudo systemctl enable --now route53-ddns.timer
+# systemctl list-timers --all | grep route53-ddns || true
+# EOS
+
 echo "==> Create systemd service…"
 "${SSH[@]}" bash -s <<EOS
 sudo tee /etc/systemd/system/route53-ddns.service >/dev/null <<'UNIT'
 [Unit]
-Description=Route53 DDNS updater (IPv4)
+Description=Fetch weather forecasts
 
 [Service]
 Type=oneshot
-EnvironmentFile=/home/pi/.env.aws
-ExecStart=/home/pi/.ip-updater.sh
+WorkingDirectory=/home/pi/apps/pihome
+Environment="PATH=/home/pi/apps/pihome/.venv/bin:/usr/bin"
+ExecStart=/home/pi/apps/pihome/.venv/bin/python manage.py fetch_forecast --location "Blankenberge"
+
 UNIT
 
 # Timer (every 5 min)
-sudo tee /etc/systemd/system/route53-ddns.timer >/dev/null <<'UNIT'
+sudo tee /etc/systemd/system/forecast.timer >/dev/null <<'UNIT'
 [Unit]
-Description=Run Route53 DDNS updater every 5 minutes
+Description=Run forecast fetch every 8 hours
 
 [Timer]
-OnBootSec=1min
-OnUnitActiveSec=5min
-AccuracySec=30s
+OnBootSec=5min
+OnUnitActiveSec=8h
 Persistent=true
 
 [Install]
@@ -87,7 +120,7 @@ WantedBy=timers.target
 UNIT
 
 sudo systemctl daemon-reload
-sudo systemctl enable --now route53-ddns.timer
-systemctl list-timers --all | grep route53-ddns || true
+sudo systemctl enable --now rforecast.timer
+systemctl list-timers --all | grep forecast.timer || true
 EOS
 
