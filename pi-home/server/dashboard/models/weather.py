@@ -1,6 +1,17 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+
+#Models a weather card on the dashboard for viewing; derived data
+class Location(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+
+    class Meta:
+        indexes = [models.Index(fields=["latitude", "longitude"])]
+
+    def __str__(self): return self.name
 class Forecast(models.Model):
     class Icon(models.TextChoices):
         SUNNY = "sunny", "Sunny"
@@ -12,10 +23,22 @@ class Forecast(models.Model):
         FOG = "fog", "Fog"
         SNOW = "snow", "Snow"
         WINDY = "windy", "Windy"
+    class WindDir(models.TextChoices):
+        N = "N"
+        NO = "NO"
+        O = "O"
+        ZO = "ZO"
+        Z = "Z"
+        ZW = "ZW"
+        W = "W"
+        NW = "NW"
 
-    location = models.CharField()
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
     at = models.DateTimeField(db_index=True)
-    icon = models.CharField(max_length=20, choices=Icon.choices,default=Icon.SUNNY)
+    generated_at = models.DateField(db_index=True)
+    time_label = models.TextField(max_length=100)
+    icon_main = models.CharField(max_length=20, choices=Icon.choices,default=Icon.SUNNY)
+    icon_transition = models.CharField(max_length=20, choices=Icon.choices, null=True)
     temperature_c = models.DecimalField(
         max_digits=4, decimal_places=1
     )  # e.g. -12.5 .. 38.4
@@ -25,7 +48,7 @@ class Forecast(models.Model):
     wind_bft = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(12)]
     )  # Beaufort 0..12
-
+    wind_dir = models.CharField(max_length=2,choices=WindDir.choices,default=WindDir.N)
 
     class Meta:
         unique_together = ("location", "at")  # no duplicates for same time/place
@@ -34,16 +57,6 @@ class Forecast(models.Model):
     def __str__(self):
         return f"{self.location} @ {self.at:%Y-%m-%d %H:%M} ({self.icon})"
     
-class Location(models.Model):
-    name = models.CharField(max_length=100, unique=True)  # e.g., "Ghent"
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-
-    class Meta:
-        indexes = [models.Index(fields=["latitude", "longitude"])]
-
-    def __str__(self): return self.name
-
 class WeatherSample(models.Model):
     """
     One timeslot per location with raw, unit-consistent values.

@@ -1,2 +1,7 @@
 django
 gunicorn
+httpx
+icalendar
+recurring-ical-events
+python-dateutil
+croniter

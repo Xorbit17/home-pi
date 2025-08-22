@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Forecast
+from models.weather import Forecast
 
 @admin.register(Forecast)
 class ForecastAdmin(admin.ModelAdmin):
