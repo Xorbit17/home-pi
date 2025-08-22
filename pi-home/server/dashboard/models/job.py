@@ -47,6 +47,7 @@ class Execution(models.Model):
     job = models.ForeignKey("Job", on_delete=models.CASCADE, related_name="executions")
     started_at = models.DateTimeField(null=True, default=None)
     finished_at = models.DateTimeField(null=True, default=None)
+    runtime_ms = models.IntegerField(null=True, default=None)
 
     status = models.CharField(max_length=20, null=True, blank=True)  # running|success|error|skipped
     summary = models.CharField(max_length=500, blank=True, default="")  # short message for dashboards

@@ -5,3 +5,7 @@ icalendar
 recurring-ical-events
 python-dateutil
 croniter
+openai
+pillow
+pillow-heif
+pydantic
