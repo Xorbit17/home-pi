@@ -35,3 +35,6 @@ override.tf.json
 # Certificates and keys
 *.crt
 *.key
+
+# Dont' track SVG
+pi-home/server/dashboard/static/svg/weather-bas
