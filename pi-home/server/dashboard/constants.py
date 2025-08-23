@@ -251,6 +251,90 @@ PATENT_LINE_DRAWING = "PATENT_LINE_DRAWING"
 VINTAGE_PRODUCT_POSTER = "VINTAGE_PRODUCT_POSTER"
 ISOMETRIC_PIXEL_OBJECT = "ISOMETRIC_PIXEL_OBJECT"
 
+ART_STYLE_CHOICES = [
+    # Portrait / People friendly classics
+    (COMMUNIST_POSTER, "Communist Poster"),
+    (STUDIO_GHIBLI_STYLE, "Studio Ghibli Style"),
+    (RETRO_PIXEL_ART, "Retro Pixel Art"),
+    (POINTILLISM_HALFTONE, "Pointillism / Halftone"),
+    (MARKER_DRAWING, "Marker Drawing"),
+    (CUBISM_ABSTRACT_FACE, "Cubism Abstract Face"),
+    (WARHOL_POP_ART, "Warhol Pop Art"),
+    (WOODCUT_LINOCUT, "Woodcut / Linocut"),
+    (MINIMAL_VECTOR_PORTRAIT, "Minimal Vector Portrait"),
+    (CHILDRENS_BOOK_ILLUSTRATION, "Children’s Book Illustration"),
+
+    # Modern / Media crossovers
+    (PIXAR_STYLE, "Pixar Style"),
+    (DISNEY_CLASSIC, "Disney Classic"),
+    (SPIDERVERSE_COMIC, "Spiderverse Comic"),
+    (GRITTY_WESTERN_COMICS, "Gritty Western Comics"),
+    (MOEBIUS_FRENCH_SCI_FI, "Moebius (French Sci-Fi)"),
+
+    # Group / Scene styles
+    (COMIC_BOOK_VIGNETTE, "Comic Book Vignette"),
+    (MANGA_DYNAMIC, "Manga Dynamic"),
+    (GHIBLI_GROUP_SCENE, "Ghibli Group Scene"),
+    (IMPRESSIONIST_BRUSHWORK, "Impressionist Brushwork"),
+    (SILHOUETTE_COLOR_BLOCKS, "Silhouette Color Blocks"),
+    (STENCIL_BANKSY_STYLE, "Stencil (Banksy Style)"),
+
+    # Animal-centric
+    (INK_WATERCOLOR, "Ink Watercolor"),
+    (RETRO_ZOO_POSTER, "Retro Zoo Poster"),
+    (NATURALIST_SKETCH, "Naturalist Sketch"),
+    (CARTOON_MASCOT, "Cartoon Mascot"),
+    (PIXEL_SPRITE_ANIMAL, "Pixel Sprite Animal"),
+    (LOWPOLY_GEOMETRIC, "Low-Poly Geometric"),
+    (PAPERCUT_LAYER_ART, "Papercut Layer Art"),
+    (TOTEM_MYTHOLOGICAL, "Totem / Mythological"),
+
+    # Landscape / Nature / City / Building
+    (UKIYOE_WOODBLOCK, "Ukiyo-e Woodblock"),
+    (PENCIL_GRAPHITE, "Pencil / Graphite"),
+    (PASTEL_POSTER, "Pastel Poster"),
+    (SILKSCREEN_PRINT, "Silkscreen Print"),
+    (GEOMETRIC_ABSTRACTION, "Geometric Abstraction"),
+    (ART_DECO_TRAVEL_POSTER, "Art Deco Travel Poster"),
+    (WATERCOLOR_WASH, "Watercolor Wash"),
+    (CHARCOAL_DRAWING, "Charcoal Drawing"),
+
+    (NOIR_COMIC_SCENE, "Noir Comic Scene"),
+    (CYBERPUNK_POSTER, "Cyberpunk Poster"),
+    (SILKSCREEN_SKYLINE, "Silkscreen Skyline"),
+    (ISOMETRIC_PIXEL_CITY, "Isometric Pixel City"),
+    (CONSTRUCTIVIST_POSTER, "Constructivist Poster"),
+    (WATERCOLOR_CITYSCAPE, "Watercolor Cityscape"),
+    (VECTOR_FLAT_ILLUSTRATION, "Vector Flat Illustration"),
+
+    (BLUEPRINT_TECHNICAL, "Blueprint / Technical"),
+    (WOODCUT_ENGRAVING, "Woodcut Engraving"),
+    (ART_DECO_ARCHITECTURAL_POSTER, "Art Deco Architectural Poster"),
+    (POP_MINIMALISM, "Pop Minimalism"),
+    (SURREALIST_DECONSTRUCTION, "Surrealist Deconstruction"),
+    (STAINED_GLASS_STYLE, "Stained Glass Style"),
+    (LINEART_SKETCH, "Lineart Sketch"),
+
+    # Nature-specific extras
+    (BOTANICAL_PLATE, "Botanical Plate"),
+    (INK_WASH_PAINTING, "Ink Wash Painting"),
+    (STENCIL_LEAVES, "Stencil Leaves"),
+    (CUTPAPER_COLLAGE, "Cut-Paper Collage"),
+    (ETCHING_COPPERPLATE, "Etching / Copperplate"),
+    (OUTLINE_WITH_COLOR, "Outline with Color"),
+    (ART_NOUVEAU_FLORAL, "Art Nouveau Floral"),
+
+    # Art / Object / Other oriented
+    (BAUHAUS_POSTER, "Bauhaus Poster"),
+    (SUPREMATISM_MINIMAL_SHAPES, "Suprematism (Minimal Shapes)"),
+    (OP_ART_HIGH_CONTRAST, "Op-Art High Contrast"),
+    (DUOTONE_POSTER, "Duotone Poster"),
+    (PATENT_LINE_DRAWING, "Patent Line Drawing"),
+    (VINTAGE_PRODUCT_POSTER, "Vintage Product Poster"),
+    (ISOMETRIC_PIXEL_OBJECT, "Isometric Pixel Object"),
+]
+
+
 PERSON_ART_STYLES: List[Tuple[str, List, List]] = [
     (
         COMMUNIST_POSTER,

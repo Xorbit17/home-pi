@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Forecast
+from .models.weather import Forecast
 
 def home(request):
     return render(request, "dashboard/home.html", {"msg": "Hello from Django templates"})

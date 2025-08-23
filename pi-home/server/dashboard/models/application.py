@@ -1,25 +1,29 @@
-# app/models/assets.py
 from django.db import models
 from django.utils import timezone
-from constants import ASSET_CHOICES
-
-class RanderedAsset(models.Model):
-    sourceImage = models.ForeignKey("SourceImage")
-    # Optional: tie an asset to a specific display; leave null for global
-    # validity window (optional, handy for daily newspapers)
-    valid_from = models.DateTimeField(default=timezone.now)
-    valid_until = models.DateTimeField(null=True, blank=True)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        indexes = [
-            models.Index(fields=["kind", "display", "valid_from"]),
-        ]
-        ordering = ["-valid_from", "-created_at"]
-
+from constants import ART_STYLE_CHOICES
 class SourceImage(models.Model):
     path = models.TextField()
-    classification = models.TextField(max_length=20, null=True, default=None) # NO, BAD, PASSABLE, GOOD, VERY_GOOD (None is not yet classified)
-    classification_reason = models.TextField(max_length=255, null=True, default=None)
+    classification = models.JSONField(null=True, default=None)  # null => not classified yet
+
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return f"SourceImage({self.id}): {self.path}"
+class RenderedAsset(models.Model):
+    source_image = models.ForeignKey(
+        "SourceImage",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="rendered_assets",
+    )
+    path = models.TextField()
+    art_style = models.CharField(max_length=64, choices=ART_STYLE_CHOICES)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        src = f"src={self.source_image_id}" if self.source_image_id else "src=None"
+        return f"RenderedAsset({self.id}): {self.art_style} ({src})"
