@@ -1,16 +1,6 @@
 from __future__ import annotations
-
-import os
-import random
-from typing import Iterable
-
-from django.db import transaction
-from job_registry import register
-from dashboard.models.job import Job
-from dashboard.models.application import SourceImage
-from dashboard.jobs.logger_job import RunLogger
 from dashboard.jobs.services.openai import openai_client
-from constants import (
+from dashboard.constants import (
     IMAGE_DIR,
     IMAGE_EXTENSIONS,
     MIME_BY_EXT,
@@ -18,15 +8,15 @@ from constants import (
     QualityClassification,
     RenderDecision,
 )
-from openai import OpenAI
+from dashboard.jobs.services.image_processing import file_to_base64
 from pathlib import Path
 import base64
-from PIL import Image
 from pydantic import BaseModel
+from openai import BadRequestError
 
 
 CLASSIFY_PROMPT = (
-    Path(__file__) / "context-templates" / "image-classifier.md"
+    Path(__file__).resolve().parent.parent / "context-templates" / "image-classifier.md"
 ).read_text()
 
 class ImageClassification(BaseModel):
@@ -54,11 +44,11 @@ def classify_image(path: str) -> ImageClassification | None:
         raise ValueError(
             f"Unsupported image extension: {ext}. Supported: {sorted(IMAGE_EXTENSIONS)}"
         )
-    mime = MIME_BY_EXT.get(ext)
-    image_bytes = Path(path).read_bytes()
-    image_b64 = base64.b64encode(image_bytes).decode("utf-8")
+    # file_to_base64 automatically converts HEIC to JPG
+    mime = MIME_BY_EXT.get("jpg") if ext == 'heic' else MIME_BY_EXT.get(ext)
+    image_b64 = file_to_base64(p)
     response = openai_client.responses.parse(
-        model="gpt-5.0",
+        model="gpt-5",
         text_format=ImageClassification,
         input=[
             {
@@ -77,8 +67,5 @@ def classify_image(path: str) -> ImageClassification | None:
             }
         ],
     )
-    return response.output_parsed
-
-@register("CLASSIFY")
-def classify_image_job(job: Job, logger: RunLogger, params: dict | None):
     pass
+    return response.output_parsed

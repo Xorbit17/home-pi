@@ -1,4 +1,4 @@
-from dashboard.jobs.services.image_processing import resize_crop, quantize_to_palette, output_image, openai_process
+from dashboard.jobs.services.generate_art import resize_crop, quantize_to_palette, output_image, openai_process
 from typing import List, Tuple
 from dashboard.color_constants import SHADED_PALETTE_SET
 

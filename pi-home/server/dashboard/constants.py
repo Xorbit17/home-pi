@@ -82,6 +82,7 @@ PUSH = "PUSH"
 ART = "ART"
 NEWSPAPER = "NEWSPAPER"
 CLASSIFY = "CLASSIFY"
+MANUAL_TRIGGER = "MANUAL_TRIGGER"
 
 JOB_KIND_CHOICES = [
     (CALENDAR, "Get calendar"),
@@ -91,6 +92,7 @@ JOB_KIND_CHOICES = [
     (ART, "Generate art"),
     (NEWSPAPER, "Generate newspaper"),
     (CLASSIFY, "Classify image"),
+    (MANUAL_TRIGGER, "Manually triggered")
 ]
 
 JobKind: TypeAlias = Literal[
@@ -100,7 +102,8 @@ JobKind: TypeAlias = Literal[
     "PUSH",
     "ART",
     "NEWSPAPER",
-    "CLASSIFY"
+    "CLASSIFY",
+    "MANUAL_TRIGGER"
 ]
 
 RUNNING = "RUNNING"

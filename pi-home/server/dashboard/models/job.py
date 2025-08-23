@@ -8,7 +8,7 @@ from dashboard.constants import LOG_LEVEL_CHOICES, JOB_KIND_CHOICES, JOB_STATUS_
 class Job(models.Model):
     name = models.CharField(max_length=120, unique=True)
     kind = models.CharField(max_length=64, choices=JOB_KIND_CHOICES)
-    cron = models.CharField(max_length=64, help_text="Cron format, e.g. '0 5 * * *'")
+    cron = models.CharField(max_length=64, help_text="Cron format, e.g. '0 5 * * *'", null=True)
     enabled = models.BooleanField(default=True)
 
     # Optional parameters for the handler
@@ -32,7 +32,7 @@ class Job(models.Model):
 
 
 class Execution(models.Model):
-    job = models.ForeignKey("Job", on_delete=models.CASCADE, related_name="executions")
+    job = models.ForeignKey("Job", on_delete=models.CASCADE, related_name="executions", null=True)
 
     started_at = models.DateTimeField(null=True, default=None)
     finished_at = models.DateTimeField(null=True, default=None)
@@ -65,6 +65,7 @@ class JobLogEntry(models.Model):
         db_index=True,
     )
     message = models.TextField()
+    context = models.JSONField(null=True, default=None)
     # A monotonic counter to preserve order without depending on timestamps
     seq = models.IntegerField()
 
