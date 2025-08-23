@@ -50,13 +50,6 @@ class Forecast(models.Model):
     )  # Beaufort 0..12
     wind_dir = models.CharField(max_length=2,choices=WindDir.choices,default=WindDir.N)
 
-    class Meta:
-        unique_together = ("location", "at")  # no duplicates for same time/place
-        ordering = ["at"]
-
-    def __str__(self):
-        return f"{self.location} @ {self.at:%Y-%m-%d %H:%M} ({self.icon})"
-    
 class WeatherSample(models.Model):
     """
     One timeslot per location with raw, unit-consistent values.

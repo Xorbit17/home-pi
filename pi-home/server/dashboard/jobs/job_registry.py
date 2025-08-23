@@ -1,9 +1,9 @@
 from typing import Callable, Dict
 from constants import JobKind
-from models.job import Job, Execution
-from .logger_job import start_execution, RunLogger
+from dashboard.jobs.logger_job import RunLogger
+from dashboard.models.job import Job, Execution
 
-Handler = Callable[[Job, RunLogger, dict], str | None]
+Handler = Callable[[Job, RunLogger, dict | None], str | None]
 
 _registry: Dict[str, Handler] = {}
 

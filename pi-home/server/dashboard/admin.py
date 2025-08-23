@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models.application import SourceImage, RenderedAsset
-from .models.job import Job, Execution, JobLogEntry
+from dashboard.models.application import SourceImage, Variant
+from dashboard.models.job import Job, Execution, JobLogEntry
 
 
 @admin.register(SourceImage)
@@ -10,7 +10,7 @@ class SourceImageAdmin(admin.ModelAdmin):
     readonly_fields = ("created_at", "updated_at")
 
 
-@admin.register(RenderedAsset)
+@admin.register(Variant)
 class RenderedAssetAdmin(admin.ModelAdmin):
     list_display = ("id", "path", "art_style", "source_image", "created_at", "updated_at")
     list_filter = ("art_style",)

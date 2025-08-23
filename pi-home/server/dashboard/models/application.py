@@ -1,16 +1,15 @@
 from django.db import models
-from django.utils import timezone
-from constants import ART_STYLE_CHOICES
+from dashboard.jobs.image_processing_declaration import ART_STYLE_CHOICES
 class SourceImage(models.Model):
     path = models.TextField()
     classification = models.JSONField(null=True, default=None)  # null => not classified yet
-
+    has_variants = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"SourceImage({self.id}): {self.path}"
-class RenderedAsset(models.Model):
+        return f"SourceImage({self.pk}): {self.path}"
+class Variant(models.Model):
     source_image = models.ForeignKey(
         "SourceImage",
         on_delete=models.SET_NULL,
@@ -25,5 +24,5 @@ class RenderedAsset(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        src = f"src={self.source_image_id}" if self.source_image_id else "src=None"
-        return f"RenderedAsset({self.id}): {self.art_style} ({src})"
+        return f"Variant({self.pk}): {self.path} (artstyle:{self.art_style})"
+

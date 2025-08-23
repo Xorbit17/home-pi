@@ -1,11 +1,11 @@
 # jobs/logger_job.py
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, cast
 from django.utils import timezone
 import traceback
-from models.job import Job, JobLogEntry, Execution
-from constants import RUNNING, QUEUED, SUCCESS, ERROR
+from dashboard.models.job import Job, JobLogEntry, Execution
+from constants import RUNNING, QUEUED, SUCCESS, ERROR, JobKind
 from job_registry import get_handler
 from django.db import transaction
 
@@ -75,7 +75,7 @@ def start_execution_immediately(job: Job, params: dict | None = None, rethrow: b
         job=job, started_at=timezone.now(), status=RUNNING, params=params or {}
     )
     logger = RunLogger(execution)
-    handler = get_handler(job.kind)
+    handler = get_handler(cast(JobKind,job.kind))
     try:
         handler(job, logger, execution.params)
         logger._close_success("Job execution succeeded")

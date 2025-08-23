@@ -2,22 +2,26 @@ from typing import Dict, Iterable, List, Sequence, Tuple, Optional, Union
 from PIL import Image
 from pathlib import Path
 from django.template import Context, Template
-from constants import OPENAI_CLIENT, IMAGE_ART_GENERATION_MODEL, OPENAI_PORTRAIT_SIZE
+from dashboard.constants import IMAGE_ART_GENERATION_MODEL, OPENAI_PORTRAIT_SIZE
 import base64
 import io
+from dashboard.jobs.services.openai import openai_client
 
 RGB = Tuple[int, int, int]
+ART_GENERATOR_PROMPT_TEMPLATE = Template(
+    (
+        Path(__file__).resolve().parent.parent
+        / "context-templates"
+        / "image-artstyle-applicator.md"
+    ).read_text(),
+)
 
-ART_GENERATOR_PROMPT_TEMPLATE = Template((Path(__file__).resolve().parent[0] / "context-templates" / "image-artstyle-applicator.md").read_text())
 
 def get_art_generator_prompt(context: dict) -> str:
     return ART_GENERATOR_PROMPT_TEMPLATE.render(Context(context))
 
-def pil_to_base64(
-    image: Image.Image,
-    format: str = "PNG",
-    **save_kwargs
-) -> str:
+
+def pil_to_base64(image: Image.Image, format: str = "PNG", **save_kwargs) -> str:
     buf = io.BytesIO()
     # JPEG requires RGB (no alpha); strip alpha if needed
     if format.upper() == "JPEG" and image.mode in ("RGBA", "LA"):
@@ -25,17 +29,24 @@ def pil_to_base64(
     image.save(buf, format=format, **save_kwargs)
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
+
 def base64_to_pil(b64: str) -> Image.Image:
     return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGBA")
+
 
 from pathlib import Path
 from PIL import Image
 
-def openai_process(image: Image.Image, markdown_filename: str, *, context: dict) -> Image.Image:
+
+def openai_process(
+    image: Image.Image, markdown_filename: str, *, context: dict
+) -> Image.Image:
     base_dir = Path(__file__).resolve().parent
     md_path = base_dir / "context-templates" / "artstyles" / markdown_filename
     markdown_content = md_path.read_text(encoding="utf-8")
-    prompt = get_art_generator_prompt(context={"artstyle_instructions": markdown_content})
+    prompt = get_art_generator_prompt(
+        context={"artstyle_instructions": markdown_content}
+    )
 
     # 2) Choose encoding + MIME that actually match
     #    Prefer PNG if image has alpha; JPEG otherwise
@@ -49,39 +60,55 @@ def openai_process(image: Image.Image, markdown_filename: str, *, context: dict)
 
     b64 = pil_to_base64(img_to_send, format=fmt)
 
-    # 3) Call Responses API with the image-generation tool
-    resp = OPENAI_CLIENT.responses.create(
-        model=IMAGE_ART_GENERATION_MODEL,  # e.g. a Responses-capable model with the image tool
+    response = openai_client.responses.create(
+        model="gpt-4.1",
+        stream=False,
         input=[
-            {"type": "input_text", "text": prompt},
-            {"type": "input_image", "image_url": f"data:{mime};base64,{b64}"},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "input_text", "text": prompt},
+                    {
+                        "type": "input_image",
+                        "image_url": f"data:{mime};base64,{b64}",
+                        "detail": "high",
+                    },
+                ],
+            }
         ],
-        tools=[{"type": "image_generation"}],
     )
+    image_data = [
+        output.result
+        for output in response.output
+        if output.type == "image_generation_call"
+    ]
+    if image_data[0]:
+        return base64_to_pil(image_data[0])
+    
+    raise Exception("OpenAI did not return an image format")
 
-    # 4) Extract first image payload defensively (SDKs may differ a bit)
-    b64_out = None
-    for out in getattr(resp, "output", []):
-        t = getattr(out, "type", "")
-        if t in ("image", "output_image"):
-            # common shapes: out.image.b64_json or out.data[0].b64_json
-            imgobj = getattr(out, "image", None) or getattr(out, "data", None)
-            if isinstance(imgobj, list) and imgobj and hasattr(imgobj[0], "b64_json"):
-                b64_out = imgobj[0].b64_json
-                break
-            if imgobj is not None and hasattr(imgobj, "b64_json"):
-                b64_out = imgobj.b64_json
-                break
-        if t == "image_generation_call" and hasattr(out, "result"):
-            res = out.result
-            if isinstance(res, dict) and "b64_json" in res:
-                b64_out = res["b64_json"]
-                break
+    # b64_out = None
+    # for out in getattr(response, "output", []):
+    #     t = getattr(out, "type", "")
+    #     if t in ("image", "output_image"):
+    #         # common shapes: out.image.b64_json or out.data[0].b64_json
+    #         imgobj = getattr(out, "image", None) or getattr(out, "data", None)
+    #         if isinstance(imgobj, list) and imgobj and hasattr(imgobj[0], "b64_json"):
+    #             b64_out = imgobj[0].b64_json
+    #             break
+    #         if imgobj is not None and hasattr(imgobj, "b64_json"):
+    #             b64_out = imgobj.b64_json
+    #             break
+    #     if t == "image_generation_call" and hasattr(out, "result"):
+    #         res = out.result
+    #         if isinstance(res, dict) and "b64_json" in res:
+    #             b64_out = res["b64_json"]
+    #             break
 
-    if b64_out is None:
-        raise RuntimeError("No image payload found in response")
+    # if b64_out is None:
+    #     raise RuntimeError("No image payload found in response")
 
-    return base64_to_pil(b64_out)
+    # return base64_to_pil(b64_out)
 
 
 def resize_crop(image: Image.Image, *, context: dict) -> Image.Image:
@@ -91,7 +118,7 @@ def resize_crop(image: Image.Image, *, context: dict) -> Image.Image:
     scale = max(target_w / src_w, target_h / src_h)
     new_w, new_h = int(src_w * scale), int(src_h * scale)
 
-    resized = image.resize((new_w, new_h), Image.LANCZOS)
+    resized = image.resize((new_w, new_h), resample=Image.Resampling.LANCZOS)
 
     left = (new_w - target_w) // 2
     top = (new_h - target_h) // 2
@@ -100,13 +127,17 @@ def resize_crop(image: Image.Image, *, context: dict) -> Image.Image:
 
     return resized.crop((left, top, right, bottom))
 
-def output_image(image: Image.Image, output: Path, format: str, *, context: dict) -> None:
+
+def output_image(
+    image: Image.Image, output: Path, format: str, *, context: dict
+) -> None:
     output = Path(output)
-    fmt = format.lstrip(".").upper() #TODO: validation
+    fmt = format.lstrip(".").upper()  # TODO: validation
     output.parent.mkdir(parents=True, exist_ok=True)
     image.save(output, format=fmt)
 
-def noop(image:Image.Image) -> Image.Image:
+
+def noop(image: Image.Image) -> Image.Image:
     return image
 
 
@@ -144,6 +175,7 @@ def build_palette_list(
         return out[:max_colors]
     return out
 
+
 def _build_P_mode_palette_image(colors: Sequence[RGB]) -> Image.Image:
     if len(colors) > 256:
         raise ValueError("Pillow palettes support max 256 colors.")
@@ -155,6 +187,7 @@ def _build_P_mode_palette_image(colors: Sequence[RGB]) -> Image.Image:
     pal = Image.new("P", (1, 1))
     pal.putpalette(flat)
     return pal
+
 
 def quantize_to_palette(img: Image.Image, colors: Sequence[RGB]) -> Image.Image:
     """
@@ -173,21 +206,23 @@ def quantize_to_palette(img: Image.Image, colors: Sequence[RGB]) -> Image.Image:
 from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple
 from PIL import Image
 
+
 class PipelineError(RuntimeError):
     """Raised when a pipeline step fails or returns an invalid result."""
+
     pass
+
 
 StepFn = Callable[..., Image.Image]
 FinishFn = Callable[..., None]
 
 
-
 def process_image(
     input: Union[Path, str],
     output: Union[Path, str],
-    pipeline: List,                  # list[Step | FinalStep]
-    pipeline_args: List[Tuple],      # per-step positional-args (tuples)
-    context: dict,                   # strict schema; passed through untouched
+    pipeline: List,  # list[Step | FinalStep]
+    pipeline_args: List[Tuple],  # per-step positional-args (tuples)
+    context: dict,  # strict schema; passed through untouched
 ) -> None:
     """
     Execute an image-processing pipeline.
@@ -210,7 +245,9 @@ def process_image(
     img = Image.open(in_path)
 
     if not pipeline:
-        raise ValueError("pipeline must contain at least one step (the final saving step).")
+        raise ValueError(
+            "pipeline must contain at least one step (the final saving step)."
+        )
 
     # Run all intermediate steps
     for step, args in zip(pipeline[:-1], pipeline_args[:-1]):
@@ -229,5 +266,3 @@ def process_image(
         final_args = (final_args,)
 
     final_step(img, out_path, *final_args, context=context)
-
-

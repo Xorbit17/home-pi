@@ -90,11 +90,6 @@ class WeeklyRule(models.Model):
         ]
         ordering = ["display", "weekday", "start_time"]
 
-    def __str__(self) -> str:
-        st = self.start_time.strftime("%H:%M")
-        et = self.end_time.strftime("%H:%M") if self.end_time != time(0, 0) else "24:00"
-        return f"{self.display} [{self.get_weekday_display()}] {st}-{et} → {self.mode}"
-
     # ---- validation: overlaps on same weekday/display ----
     def clean(self):
         if self.start_time == self.end_time:

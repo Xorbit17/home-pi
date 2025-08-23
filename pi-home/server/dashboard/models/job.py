@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from django.db import models
 from django.utils import timezone
-from constants import LOG_LEVELS, JOB_KIND_CHOICES, JOB_STATUS_CHOICES
+from dashboard.constants import LOG_LEVEL_CHOICES, JOB_KIND_CHOICES, JOB_STATUS_CHOICES
 
 
 class Job(models.Model):
@@ -28,7 +28,7 @@ class Job(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"Job({self.id}): {self.name} [{self.kind}]"
+        return f"Job({self.pk}): {self.name} [{self.kind}]"
 
 
 class Execution(models.Model):
@@ -49,9 +49,8 @@ class Execution(models.Model):
 
     def __str__(self) -> str:
         when = self.started_at.isoformat() if self.started_at else "pending"
-        return f"Execution({self.id}): job={self.job_id} status={self.status} @ {when}"
+        return f"Execution({self.pk}): job={self.job} status={self.status} @ {when}"
 
-s
 class JobLogEntry(models.Model):
     execution = models.ForeignKey(
         Execution,
@@ -61,7 +60,7 @@ class JobLogEntry(models.Model):
     ts = models.DateTimeField(default=timezone.now, db_index=True)
     level = models.CharField(
         max_length=10,
-        choices=LOG_LEVELS,
+        choices=LOG_LEVEL_CHOICES,
         default="INFO",
         db_index=True,
     )
@@ -73,4 +72,4 @@ class JobLogEntry(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"JobLogEntry({self.id}): exec={self.execution_id} #{self.seq} [{self.level}]"
+        return f"JobLogEntry({self.pk}): exec:{self.execution} #{self.seq} [{self.level}]"

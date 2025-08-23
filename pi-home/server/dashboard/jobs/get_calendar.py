@@ -1,5 +1,5 @@
 from job_registry import register
-from models.job import Job
+from dashboard.models.job import Job
 from .logger_job import RunLogger
 
 @register("CALENDAR")

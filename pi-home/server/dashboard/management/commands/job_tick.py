@@ -1,13 +1,14 @@
-# minute_tick.py
-from django.utils import timezone
+# dashboard/management/commands/job_tick.py
 from datetime import timedelta, datetime
-from croniter import croniter
 
-from models.job import Job, Execution
-from jobs.logger_job import start_execution_queued
-from constants import RUNNING, QUEUED
+from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils import timezone
+from croniter import croniter
+
+from dashboard.models.job import Job, Execution
+from jobs.logger_job import start_execution_queued
+from constants import RUNNING, QUEUED
 
 def _cron_due_this_minute(expr: str, now: datetime) -> bool:
     """True if cron expr fires at 'now' (minute precision)."""
@@ -19,7 +20,7 @@ def find_eligible_jobs(now: datetime) -> list[Job]:
     candidates = Job.objects.filter(enabled=True)
     return [j for j in candidates if _cron_due_this_minute(j.cron, now)]
 
-def queue_due_jobs(now):
+def queue_due_jobs(now: datetime):
     due = find_eligible_jobs(now)
     with transaction.atomic():
         for job in due:
@@ -36,16 +37,19 @@ def queue_due_jobs(now):
 
 def tick_minute() -> None:
     now = timezone.now().replace(second=0, microsecond=0)
-    # 1) Find due jobs and queue them atomically
     queue_due_jobs(now)
 
-    # 2) If anything is running, do nothing else this minute
     if Execution.objects.filter(status=RUNNING).exists():
         print("An execution is still running; will try again next minute.")
         return
 
-    # 3) Start queued runs (FIFO). If you truly want one-at-a-time, start only the first().
     for execution in Execution.objects.filter(status=QUEUED).order_by("created_at"):
         start_execution_queued(execution)
 
-tick_minute()
+
+class Command(BaseCommand):
+    help = "Check which jobs are due this minute and queue/start them."
+
+    def handle(self, *args, **options):
+        tick_minute()
+        self.stdout.write(self.style.SUCCESS("job_tick completed"))
