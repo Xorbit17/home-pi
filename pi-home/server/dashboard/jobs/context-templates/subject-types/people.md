@@ -1,7 +1,15 @@
-# People
+# People (group photo / family photo)
 
-Pictures featuring more then one person typically show a family and an activity.
-When composition is challenging crop so at least all of the faces are in the fame.
-When there is a nice backdrop such as beautiful nature or architecture move the frame up so the backdrop is more visible.
-Make sure the faces are not too big so the images looks overfull; but also not so small the faces are hard to see.
-Pictures with people can contain dynamic poses and facial expressions. Keep them.
+This is a neutral, artistic stylization for private display.
+
+Content & safety:
+- Keep the same people; do not add, remove, or replace anyone.
+- Keep identities recognizable; do not change age, body type, or skin tone.
+- No text, logos, slogans, badges, or readable signs unless requested by the art style.
+- Do not imply politics, crime, danger, or sensitive topics.
+- Clothing stays as-is; no suggestive or revealing alterations.
+
+Composition:
+- If framing is difficult, crop to include all heads and shoulders with comfortable spacing.
+- When there’s a scenic background (nature/architecture), include some of it while keeping faces clear and not oversized.
+- Natural expressions and poses are fine; do not fabricate extreme or upsetting actions.

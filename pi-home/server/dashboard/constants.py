@@ -122,6 +122,16 @@ JOB_STATUS_CHOICES = [
 
 JobStatus = Literal["RUNNING", "SUCCESS", "SKIPPED", "ERROR", "QUEUED"]
 
+CRON = "CRON"
+MANUAL = "MANUAL"
+
+JOB_TYPE_CHOICES = [
+    (CRON, "Triggered by chron"),
+    (MANUAL, "Triggered manually"),
+]
+
+JobType = Literal["CRON", "MANUAL"]
+
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".heic"}
 MIME_BY_EXT = {
     ".jpg": "image/jpeg",
@@ -131,12 +141,3 @@ MIME_BY_EXT = {
     ".bmp": "image/bmp",
     ".heic": "image/heic",
 }
-
-QualityClassification: TypeAlias = Literal["NOT_SUITED", "BAD", "PASSABLE", "GOOD", "VERY_GOOD"]
-
-ContentTypeClassification: TypeAlias = Literal[
-    "PERSON", "PEOPLE", "ANIMAL", "LANDSCAPE", "CITY", "BUILDING",
-    "NATURE", "ART", "OBJECT", "OTHER"
-]
-
-RenderDecision: TypeAlias = Literal["BOTH", "ARTIFY", "LEAVE_PHOTO"]

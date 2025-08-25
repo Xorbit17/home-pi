@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from django.db import models
 from django.utils import timezone
-from dashboard.constants import LOG_LEVEL_CHOICES, JOB_KIND_CHOICES, JOB_STATUS_CHOICES
+from dashboard.constants import LOG_LEVEL_CHOICES, JOB_KIND_CHOICES, JOB_STATUS_CHOICES, JOB_TYPE_CHOICES
 
 
 class Job(models.Model):
-    name = models.CharField(max_length=120, unique=True)
+    name = models.CharField(max_length=120)
     kind = models.CharField(max_length=64, choices=JOB_KIND_CHOICES)
+    job_type = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
     cron = models.CharField(max_length=64, help_text="Cron format, e.g. '0 5 * * *'", null=True)
     enabled = models.BooleanField(default=True)
 
@@ -32,7 +33,7 @@ class Job(models.Model):
 
 
 class Execution(models.Model):
-    job = models.ForeignKey("Job", on_delete=models.CASCADE, related_name="executions", null=True)
+    job = models.ForeignKey("Job", on_delete=models.CASCADE, related_name="executions")
 
     started_at = models.DateTimeField(null=True, default=None)
     finished_at = models.DateTimeField(null=True, default=None)

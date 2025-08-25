@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 import random
-from typing import Iterable
 
 from dashboard.models.job import Job
 from dashboard.models.application import SourceImage
@@ -12,10 +11,9 @@ from dashboard.constants import (
     IMAGE_EXTENSIONS,
 )
 from dashboard.jobs.services.classify_image import classify_image
-from dashboard.jobs.job_registry import DummyJob, register
+from dashboard.jobs.job_registry import register
 from PIL import Image
 import json
-from openai import BadRequestError
 
 
 def find_files() -> set[str]:
@@ -57,8 +55,8 @@ def classify_new_image(path: str, logger: RunLogger, params: dict | None):
 
 
 @register("CLASSIFY")
-def classify_images(job: Job | DummyJob, logger: RunLogger, params: dict | None):
-    max_num_to_classify = int((params or {}).get("max_num_to_classify", 20))
+def classify_images(job: Job, logger: RunLogger, params: dict | None):
+    max_num_to_classify = int((params or {}).get("max_num_to_classify", 1))
     if max_num_to_classify <= 0:
         logger.warn("Nothing to do: max_num_to_generate <= 0")
         return

@@ -17,8 +17,8 @@ class Variant(models.Model):
         blank=True,
         related_name="rendered_assets",
     )
-    path = models.TextField()
-    art_style = models.CharField(max_length=64, choices=ART_STYLE_CHOICES)
+    path = models.TextField(null=True, default=None) # Null means variant was created but generation has crashed
+    art_style = models.CharField(max_length=64, choices=ART_STYLE_CHOICES, null=True, default=None)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

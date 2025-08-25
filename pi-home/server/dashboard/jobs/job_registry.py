@@ -1,62 +1,59 @@
-from typing import Callable, Dict
-from dashboard.constants import JobKind, RUNNING, QUEUED
-from dashboard.jobs.logger_job import RunLogger
+from typing import Callable, Dict, Any, Tuple, Type
+from dashboard.constants import JobKind, RUNNING, QUEUED, MANUAL, CRON
 from dashboard.models.job import Job, Execution
 from django.utils import timezone
 
 from datetime import datetime
 from typing import Optional, Dict, cast
 from django.db import transaction
+from pydantic import BaseModel
 
-class DummyJob:
-    def __init__(
-        self,
-        kind,
-        params = None,
-    ):
-        self.name = "DummyJob"
-        self.kind = kind
-        self.cron = None
-        self.enabled = True
-        self.params = params or {}
+from dashboard.jobs.logger_job import RunLogger
 
-        self.last_run_started_at = None
-        self.last_run_finished_at = None
-        self.last_run_status = None
-        self.last_run_message = ""
+Handler = Callable[[Job, RunLogger, Any], str | None]
 
-        self.created_at = timezone.now()
-        self.updated_at = timezone.now()
+_registry: Dict[str, Tuple[Handler, Optional[Type[BaseModel]]]] = {}
 
-    def __str__(self) -> str:
-        return f"DummyJob: {self.name} [{self.kind}]"
-
-
-Handler = Callable[[Job | DummyJob, RunLogger, dict | None], str | None]
-
-_registry: Dict[str, Handler] = {}
-
-def register(kind: JobKind):
+def register(kind: JobKind, param_model: Optional[Type[BaseModel]] = None):
     def deco(fn: Handler):
-        _registry[kind] = fn
+        _registry[kind] = (fn, param_model)
         return fn
     return deco
 
 def get_handler(kind: JobKind) -> Handler:
     try:
-        return _registry[kind]
+        return _registry[kind][0]
     except KeyError:
         raise KeyError(f"No handler registered for kind '{kind}'")
     
-def test_job(jobKind: JobKind, params: dict | None = None, rethrow: bool = False):
-    execution = Execution.objects.create(
-        job=None, started_at=timezone.now(), status=RUNNING, params=params or {}
-    )
-    logger = RunLogger(execution)
-    handler = get_handler(jobKind)
-    dummy = DummyJob(jobKind)
+def get_validator(kind: JobKind) -> Type[BaseModel] | None:
     try:
-        handler(dummy, logger, execution.params)
+        return _registry[kind][1]
+    except KeyError:
+        raise KeyError(f"No validator registered for kind '{kind}'. Shoud be defined and automatically None if no params. Impossible")
+    
+def test_job(jobKind: JobKind, rethrow: bool = False, *, params: Dict[str,Any]):
+    validator = get_validator(jobKind)
+    validated_params = None
+    if validator:
+        validated_params = validator.model_validate(params)
+    job = Job.objects.create(
+        name="Manually triggered",
+        kind=jobKind,
+        job_type = MANUAL,
+        enabled=True,
+        params="",
+    )
+    execution = Execution.objects.create(
+        job=job,
+        started_at=timezone.now(),
+        status=RUNNING,
+        params=params or {},
+    )
+    logger = RunLogger(job, execution)
+    handler = get_handler(jobKind)
+    try:
+        handler(job, logger, validated_params)
         logger._close_success("Job execution succeeded")
     except Exception as e:
         logger._close_error(e, "Job execution failed")
@@ -66,6 +63,9 @@ def test_job(jobKind: JobKind, params: dict | None = None, rethrow: bool = False
 
 @transaction.atomic
 def start_execution_queued(execution: Execution):
+    if not execution.job and not getattr(execution.job, "kind", False):
+        raise RuntimeError("start_execution_queued must receive an execution with a job eagerly loaded")
+    job = cast(Job, execution.job)
     # Only flip to RUNNING if it's still QUEUED (prevents double starts)
     updated = (Execution.objects
                .filter(pk=execution.pk, status=QUEUED)
@@ -74,8 +74,7 @@ def start_execution_queued(execution: Execution):
         return  # someone else started it
     execution.refresh_from_db(fields=["status", "started_at"])
 
-    job = execution.job
-    logger = RunLogger(execution)
+    logger = RunLogger(job, execution)
     handler = get_handler(cast(JobKind,job.kind))
     try:
         handler(job, logger, execution.params)

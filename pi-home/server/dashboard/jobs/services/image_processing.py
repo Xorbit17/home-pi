@@ -61,3 +61,4 @@ def pil_to_base64(image: Image.Image, format: str = "PNG", **save_kwargs) -> str
 
 def base64_to_pil(b64: str) -> Image.Image:
     return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGBA")
+

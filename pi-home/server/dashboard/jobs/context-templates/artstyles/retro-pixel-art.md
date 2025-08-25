@@ -1,12 +1,16 @@
 # Style: Retro Pixel Art Portrait
 
+## Inspiration
+
+Retro games, retro computers, terminals, 8-bit color games, sprites of old games, Atari, Nintendo, Sega, Commodore, IBM, Spece Invaders, Duke Nukem, Old side scrolling games, Old DOOM, ...
+
 ## Core Style
 
 - **Resolution & Grid**  
   Render at a low native resolution (e.g., 32×32 or 64×64). Every output pixel must align to the integer grid—no sub-pixel shifts. If only one or two people are present use a more coarse resolution, if more then to people are present use a little finer.
 
 - **Palette & Color**  
-  Use a **limited indexed palette** (8–32 colors) inspired by 8-/16-bit hardware (e.g., NES, Commodore 64, Amiga). Preserve separate ramps for skin, hair, shadow, and highlight—avoid blending or gradients.
+  Use a **limited indexed palette** (8–32 colors) inspired by 8-/16-bit hardware (e.g., NES, Commodore 64, Amiga). Preserve separate ramps for skin, hair, shadow, and highlight—avoid blending or gradients. Be more included towards brighter, cheerier colors and the colors that were hip in the 80's and 90's (purple, yellow, pink, neon like)
 
 - **Rendering & Edges**  
   Hard, crisp pixel edges only—no anti-aliasing. Optional subtle **dithering** (e.g., ordered/Bayer) may be used for mid-tones like cheeks or shadows but not on core facial features (eyes, mouth).
@@ -35,7 +39,7 @@
    Enforce grid alignment (snap any misaligned pixels). Simplify tiny artifacts. Refine features with manual—or tool-assisted—tweaks to ensure clarity.
 
 6. **Background Replace**  
-   Fill the background with a flat or two-step quantized gradient or transform the background into a fictional game universe. Ensure it contrasts nicely with the subject.
+   Fill the background with a flat or quantized gradient or transform the background into a fictional game universe. Ensure it contrasts nicely with the subject.
 
 ## Do
 
@@ -47,8 +51,9 @@
 ## Avoid
 
 - Any form of anti-aliasing or gradient blending.
-- Photographic details—textures, blur, smooth shading.
+- Photographic details/textures, blur, smooth shading.
 - Background clutter or complex backdrop patterns.
 - Palette overflow or unintended color bleed.
+- Text on te image
 
 Note: Post processing will be applied to help with the pixelated look.

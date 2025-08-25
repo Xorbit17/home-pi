@@ -3,12 +3,13 @@ from datetime import timedelta, datetime
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from croniter import croniter
 
 from dashboard.models.job import Job, Execution
-from jobs.logger_job import start_execution_queued
-from constants import RUNNING, QUEUED
+from dashboard.jobs.job_registry import start_execution_queued
+from constants import RUNNING, QUEUED, CRON
 
 def _cron_due_this_minute(expr: str, now: datetime) -> bool:
     """True if cron expr fires at 'now' (minute precision)."""
@@ -17,8 +18,8 @@ def _cron_due_this_minute(expr: str, now: datetime) -> bool:
     return prev == base
 
 def find_eligible_jobs(now: datetime) -> list[Job]:
-    candidates = Job.objects.filter(enabled=True)
-    return [j for j in candidates if _cron_due_this_minute(j.cron, now)]
+    candidates = Job.objects.filter(~Q(cron=None), enabled=True,)
+    return [j for j in candidates if _cron_due_this_minute(j.cron or "", now)]
 
 def queue_due_jobs(now: datetime):
     due = find_eligible_jobs(now)
@@ -39,7 +40,7 @@ def tick_minute() -> None:
     now = timezone.now().replace(second=0, microsecond=0)
     queue_due_jobs(now)
 
-    if Execution.objects.filter(status=RUNNING).exists():
+    if Execution.objects.select_related("job").filter(status=RUNNING, type=CRON).exists():
         print("An execution is still running; will try again next minute.")
         return
 

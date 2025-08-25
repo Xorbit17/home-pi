@@ -1,17 +1,15 @@
-# jobs/logger_job.py
-from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Any, cast
 from django.utils import timezone
 import traceback
 from dashboard.models.job import Job, JobLogEntry, Execution
 from dashboard.constants import RUNNING, QUEUED, SUCCESS, ERROR, JobKind
-import json
 
 MAX_LINES_PER_RUN = 500
 
 @dataclass
 class RunLogger:
+    job: Job
     execution: Execution
     _seq: int = 0
     _lines_written: int = 0
@@ -42,6 +40,12 @@ class RunLogger:
     def incr(self, key: str, by: int = 1):
         self._agg[key] = self._agg.get(key, 0) + by
 
+    def _start(self):
+        now = timezone.now()
+        self.execution.status = RUNNING
+        self.execution.started_at = now
+        self.execution.save()
+
     def _close_success(self, summary: str = ""):
         if self._closed: return
         self._closed = True
@@ -52,6 +56,11 @@ class RunLogger:
         self.execution.finished_at = now
         self.execution.runtime_ms = int((now - started).total_seconds() * 1000)
         self.execution.save()
+        self.job.last_run_status = SUCCESS
+        self.job.last_run_started_at = self.execution.started_at
+        self.job.last_run_finished_at = self.execution.finished_at
+        self.job.save()
+        self.debug(f"Job Execution finished:\nSummary: {summary}")
 
     def _close_error(self, exc: BaseException, summary: str = ""):
         if self._closed: return
@@ -65,3 +74,8 @@ class RunLogger:
         started = self.execution.started_at or now
         self.execution.runtime_ms = int((now - started).total_seconds() * 1000)
         self.execution.save()
+        self.job.last_run_status = ERROR
+        self.job.last_run_started_at = self.execution.started_at
+        self.job.last_run_finished_at = self.execution.finished_at
+        self.job.save()
+        self.error(f"Job Execution error:\nSummary: {summary}\nTraceback: {tb}")

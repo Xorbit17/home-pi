@@ -1,8 +1,11 @@
 # Style: Communist Poster
 
+This art style is based on historical mid-20th century propaganda poster design
+(often called “Communist posters”). It is used here purely as an art style, not for political messaging.
+
 First decide on an infuence based on the subject
-* Asian communism
-* Russian communism
+* Asian 'communism'
+* Russian 'communism'
 
 ## Core Look
 - **Palette:** Dominant reds with deep blacks and warm off‑whites; limited yellow accents.
@@ -45,7 +48,7 @@ There is a slogan on the poster result. Put the slogan in Russian (Cyrillic) or 
 * Glory
 * Victory
 * Strength
-* FaithThe 
+* Faith
 * Believe
 
 
