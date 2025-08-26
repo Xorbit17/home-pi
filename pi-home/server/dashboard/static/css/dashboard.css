@@ -1,0 +1,504 @@
+/* E-ink friendly base: solid fills, no gradients; clear hierarchy
+   Default sans-serif found on Debian/Raspbian is typically DejaVu Sans.
+*/
+:root {
+    /* Core palette mapped to your 6 colors */
+    --red: #ff0000;
+    --green: #00ff00;
+    --blue: #0000ff;
+    /* accent */
+    --yellow: #ffff00;
+    --black: #000000;
+    --white: #ffffff;
+
+    /* Light tints (~10%) for subtle backgrounds (no gradients) */
+    --red-10: #fbe9ec;
+    --green-10: #eaf6ea;
+    --blue-10: #e8f0fb;
+    --yellow-10: #fff8e0;
+
+    /* 50% tints (color + white at 1:1) */
+    --red-50: #ff8080;
+    --green-50: #80ff80;
+    --blue-50: #8080ff;
+    --yellow-50: #ffff80;
+
+
+
+    /* Text & borders */
+    --text: var(--black);
+    --muted: #333;
+
+    /* Accent defaults */
+    --accent: var(--blue);
+    --accent-bg: var(--blue-10);
+
+    --light-grey: #f2f2f2;
+    --bg: var(--light-grey);
+    --bg-card: var(--white);
+    /* still black-ish for e-ink */
+    --border: #111;
+    --border-medium: #222;
+    --border-light: var(--bg)
+}
+
+/* Typography */
+html,
+body {
+    background: var(--white);
+    color: var(--text);
+    font-size: 12pt;
+    /* base size */
+    line-height: 1.35;
+    margin: 0;
+    padding: 0;
+
+    /* E-ink readability tweaks */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", "DejaVu Sans", "Liberation Sans", Arial, sans-serif;
+}
+
+.dashboard-container {
+    width: 1200px;
+    height: 1600px;
+    margin: 0 auto;
+    background: var(--bg, #ffffff);
+    overflow: hidden;
+    /* clip anything that exceeds height/width */
+    position: relative;
+    /* stable for screenshots */
+}
+
+/* Layout grid (1200x1600 portrait target) */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+        "header   header"
+        "weather  weather"
+        "memory   cpu"
+        "disk     network"
+        "transmission docker "
+        "transmission calendar";
+    gap: 12px;
+    padding: 12px;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.grid>* {
+    min-width: 0;
+}
+
+/* Card component */
+.card {
+    background: var(--bg-card);
+    padding: 10px 12px;
+    border-radius: 12px;
+}
+
+/* Specific areas */
+.header {
+    grid-area: header;
+}
+
+.weather {
+    grid-area: weather;
+}
+
+.memory {
+    grid-area: memory;
+}
+
+.disk {
+    grid-area: disk;
+}
+
+.cpu {
+    grid-area: cpu;
+}
+
+.network {
+    grid-area: network;
+}
+
+.docker {
+    grid-area: docker;
+}
+
+.calendar {
+    grid-area: calendar;
+}
+
+.transmission {
+    grid-area: transmission;
+}
+
+/* Header band */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+    border-bottom: 2px solid var(--border-medium);
+    padding-bottom: 6px;
+    min-width: 0;
+    /* allow shrink */
+}
+
+.title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.subtitle {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.meta {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+    font-size: 0.95rem;
+}
+
+.badge {
+    padding: 2px 6px;
+    border: 2px solid var(--accent);
+    font-weight: 700;
+    border-radius: 6px;
+}
+
+.badge-accent {
+    color: var(--accent);
+    background: var(--accent-bg);
+}
+
+/* Alerts strip */
+.alerts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.alert {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 6px;
+    font-weight: 700;
+}
+
+.alert.info {
+    background: var(--blue-10);
+}
+
+.alert.warning {
+    background: var(--yellow-10);
+}
+
+.alert.danger {
+    background: var(--red-10);
+}
+
+.alert.good {
+    background: var(--green-10);
+}
+
+/* Section headers */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    border-bottom: 2px solid var(--border-medium);
+    padding-bottom: 4px;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.05rem;
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* WEATHER */
+.weather-cards {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow: hidden;
+    /* clip extra cards */
+}
+
+/* 5 cards × 220px + 4 gaps × 8px = 1132px (fits inside 1200) */
+.weather-card {
+    flex: 0 0 220px;
+    /* fixed width, no grow, no shrink */
+    background: var(--bg-card, #f2f2f2);
+    border-radius: 6px;
+    padding: 6px;
+    box-sizing: border-box;
+}
+
+.wc-title {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.wc-temp {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 1.1rem;
+    margin-bottom: 2px;
+}
+
+.wc-tmax {
+    color: var(--accent, #1565c0);
+    font-weight: 700;
+}
+
+.wc-tmin {
+    opacity: 0.8;
+}
+
+.wc-desc {
+    margin: 2px 0 4px 0;
+}
+
+.wc-meta {
+    font-size: 0.95rem;
+    display: flex;
+    gap: 8px;
+}
+
+.wc-icon {
+    margin-top: 4px;
+}
+
+/* Optional: ensure any weather SVG/IMG icons stay within card bounds */
+.weather-card img,
+.weather-card svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Key-value compact lists */
+.kv {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 12px;
+}
+
+.kv dt {
+    font-weight: 700;
+}
+
+.kv dd {
+    margin: 0;
+}
+
+/* Disks */
+.disk-list {
+    display: flex;
+}
+
+.disk-list>div {
+    padding-right: 12px;
+    margin-right: 12px;
+    border-right: 2px solid var(--border);
+}
+
+.disk-list>div:last-child {
+    padding-right: 0px;
+    margin-right: 0px;
+    border-right: 0px;
+}
+
+
+.disk-item {
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+}
+
+.disk-info p {
+    margin: 0 0 2px;
+}
+
+.disk-canvas {
+    display: block;
+    /* remove baseline gap */
+    flex: 0 0 96px;
+    /* don't shrink in flex */
+}
+
+/* Network charts */
+.net-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* Tables */
+.tbl {
+    width: calc(100% - 24px);
+    margin: 12px;
+    table-layout: fixed;
+}
+
+.tbl th,
+.tbl td {
+    padding: 6px 8px;
+}
+
+.tbl thead th {
+    background: var(--blue-10);
+    text-align: left;
+}
+
+.tbl thead tr>th:first-child {
+    border-radius: 6px 0px 0px 6px;
+}
+
+.tbl thead tr>th:last-child {
+    border-radius: 0px 6px 6px 0px;
+}
+
+
+/* Status dots (map to your palette) */
+.status-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.status-dot.running,
+.status-dot.healthy,
+.status-dot.good {
+    background: var(--green);
+}
+
+.status-dot.exited,
+.status-dot.stopped {
+    background: var(--yellow);
+}
+
+.status-dot.unhealthy,
+.status-dot.error,
+.status-dot.failed {
+    background: var(--red);
+}
+
+.status-dot.unknown {
+    background: var(--black);
+}
+
+/* Calendar */
+.calendar .calendar-block {
+    margin-bottom: 10px;
+}
+
+.calendar h3 {
+    margin: 6px 0 4px;
+    font-size: 1rem;
+}
+
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.list li {
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--border-medium);
+}
+
+.list .time {
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.list .title {}
+
+.list .location {
+    opacity: 0.9;
+}
+
+.day {
+    margin-bottom: 6px;
+}
+
+.day-label {
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+
+.muted {
+    opacity: 0.9;
+}
+
+/* Icons */
+.icon {
+    width: 32px;
+    height: 32px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+}
+
+/* Print-like clarity for e-ink export */
+@media print {
+    body {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* Optional: narrow fallback stacks the grid (useful during dev on a laptop) */
+@media (max-width: 1100px) {
+    .grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "weather"
+            "calendar"
+            "system"
+            "disk"
+            "cpu"
+            "network"
+            "docker";
+    }
+
+    .weather-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

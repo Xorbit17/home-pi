@@ -1,0 +1,266 @@
+{% load static %}
+{% load svg %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Home Dashboard</title>
+    <meta name="viewport" content="width=1200, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js" integrity="sha512-Y51n9mtKTVBh3Jbx5pZSJNDDMyY+yGe77DGtBPzRlgsf/YLCh13kSZ3JmfHGzYFCmOndraf0sQgfM654b7dJ3w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<body>
+    <div class="dashboard-container">
+        <main class="grid">
+
+            <!-- HEADER (band + alerts) /-->
+            <section class="card header" aria-label="header">
+                <div class="header-top">
+                    <div class="header-left">
+                        <div class="title">
+                            <span class="icon">{% svg "svg/tabler/home.svg" %}</span>
+                            <span>Home Status</span>
+                        </div>
+                        <div class="meta">
+                            <span>Host: {{ header.hostname|default:"raspi" }}</span>
+                            <span>As of: {{ header.now|date:"Y-m-d H:i" }}</span>
+                            <span>Uptime: {{ system.uptime|default:"—" }}</span>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <span class="badge badge-accent">Last update: {{ header.last_update|date:"H:i" }}</span>
+                    </div>
+                </div>
+
+                {% if alerts %}
+                <div class="alerts">
+                    {% for a in alerts %}
+                    <div class="alert {{ a.level|default:'info' }}">
+                        <span class="icon">{% svg "svg/tabler/home.svg" %}</span>
+                        <span>{{ a.text }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- WEATHER (today/tonight + next 4 days) -->
+            <section class="card weather" aria-label="weather">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/sun.svg" %}</span> Weather</h2>
+                    <small>Updated: {{ weather.updated_at|date:"H:i" }}</small>
+                </header>
+                <div class="weather-cards">
+                    {% for day in weather.days %}
+                    <article class="weather-card">
+                        <div class="wc-title">{{ day.label }}</div>
+                        <div class="wc-temp">
+                            <span class="wc-tmax">{{ day.tmax }}°</span>
+                            <span class="wc-tmin">{{ day.tmin }}°</span>
+                        </div>
+                        <div class="wc-desc">{{ day.summary }}</div>
+                        <div class="wc-meta">
+                            <span>Wind: {{ day.wind }}</span>
+                            <span>Rain: {{ day.rain_chance }}%</span>
+                        </div>
+                        <div class="wc-icon" aria-hidden="true">[icon]</div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- DISKS -->
+            <section class="card disk" aria-label="disks">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/database.svg" %}</span> Disks</h2>
+                    <small>Updated: {{ disks.updated_at|date:"H:i" }}</small>
+                </header>
+
+                <div class="disk-list">
+                    {% for d in disks.items %}
+                    <div class="disk-item">
+                        <canvas
+                            class="disk-canvas"
+                            id="disk-canvas-{{ d.id }}"
+                            width="96"
+                            height="96">
+                        </canvas>
+                        <div class="disk-info">
+                            <p>ID: {{ d.id }}</p>
+                            <p>U: {{d.used|floatformat:1}}GB/</p>
+                            <p>T: {{d.total|floatformat:1}}GB</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- MEMORY -->
+            <section class="card memory" aria-label="memory">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/cpu.svg" %}</span> Memory</h2>
+                    <small>Updated: {{ disks.updated_at|date:"H:i" }}</small>
+                </header>
+                <canvas id="memChart" height="180"></canvas>
+            </section>
+
+
+            <!-- CPU CHART (last 6h) -->
+            <section class="card cpu" aria-label="cpu">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/cpu.svg" %}</span> CPU (last 6h)</h2>
+                    <small>Placeholder data</small>
+                </header>
+                <canvas id="cpuChart" height="180"></canvas>
+            </section>
+
+            <!-- NETWORK (in/out last hour) -->
+            <section class="card network" aria-label="network">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/network.svg" %}</span> Network (last hour)</h2>
+                    <small>Placeholder data</small>
+                </header>
+                <div class="net-charts">
+                    <div class="net-block">
+                        <div class="subtitle">Inbound</div>
+                        <canvas id="netInChart" height="140"></canvas>
+                    </div>
+                    <div class="net-block">
+                        <div class="subtitle">Outbound</div>
+                        <canvas id="netOutChart" height="140"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TRANSMISSION -->
+            <section class="card transmission" aria-label="transmission">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/cloud-down.svg" %}</span> Transmission</h2>
+                    <small>Updated: {{ disks.updated_at|date:"H:i" }}</small>
+                </header>
+                
+            </section>
+
+            <!-- DOCKER -->
+            <section class="card docker" aria-label="docker">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/brand-docker.svg" %}</span> Docker</h2>
+                    <small>Updated: {{ docker.updated_at|date:"H:i" }}</small>
+                </header>
+
+                <table class="tbl">
+                    <thead>
+                        <tr>
+                            <th>Container</th>
+                            <th>State</th>
+                            <th>Health</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in docker.containers %}
+                        <tr>
+                            <td>{{ c.name }}</td>
+                            <td>
+                                <span class="status-dot {{ c.state|default:'unknown' }}"></span>
+                                {{ c.state }}
+                            </td>
+                            <td>
+                                <span class="status-dot {{ c.health|default:'unknown' }}"></span>
+                                {{ c.health|default:"—" }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- CALENDAR (today + week remainder) -->
+            <section class="card calendar" aria-label="calendar">
+                <header class="section-header">
+                    <h2><span class="icon">{% svg "svg/tabler/calendar.svg" %}</span> Calendar</h2>
+                    <small>Updated: {{ calendar.updated_at|date:"H:i" }}</small>
+                </header>
+
+                {% if calendar.today %}
+                <div class="calendar-block">
+                    <h3>Today</h3>
+                    <ul class="list">
+                        {% for e in calendar.today %}
+                        <li>
+                            <span class="time">{{ e.start|date:"H:i" }}</span>
+                            <span class="title">{{ e.title }}</span>
+                            {% if e.location %}<span class="location">• {{ e.location }}</span>{% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                {% if calendar.week %}
+                <div class="calendar-block">
+                    <h3>Rest of week</h3>
+                    {% for day in calendar.week %}
+                    <div class="day">
+                        <div class="day-label">{{ day.date|date:"D d M" }}</div>
+                        {% if day.events %}
+                        <ul class="list">
+                            {% for e in day.events %}
+                            <li>
+                                <span class="time">{{ e.start|date:"H:i" }}</span>
+                                <span class="title">{{ e.title }}</span>
+                                {% if e.location %}<span class="location">• {{ e.location }}</span>{% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <div class="muted">No events</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </section>
+
+        </main>
+    </div>
+
+
+    <!-- Optional: you’ll wire real data later; below IDs exist for your JS init -->
+    <script>
+        Chart.defaults.backgroundColor = '#FFFFFF';
+        Chart.defaults.borderColor = '#36A2EB';
+        Chart.defaults.color = '#000';
+        const options = { 
+            responsive: false, 
+            animation: false,
+            devicePixelRatio: 1,
+        };
+        
+        const labels = [
+                "Used",
+                "Unused",
+            ]
+        const backgroundColor = ['#0000ff','#8080ff'];
+
+        {% for d in disks.items %}
+        const data_disk_{{d.id |escapejs}} = {
+            datasets: [{
+                label: "{{d.id |escapejs }}",
+                data: [{{d.pct}},{{d.pct_unused}}],
+                backgroundColor,
+            }]
+        }
+        const config_{{d.id |escapejs }} = {
+            type: 'doughnut',
+            data: data_disk_{{d.id}},
+            options,
+        };
+        new Chart(
+            document.getElementById('disk-canvas-{{d.id |escapejs}}'),
+            config_{{d.id}},
+        );
+        {% endfor %}
+    </script>
+</body>
+
+</html>

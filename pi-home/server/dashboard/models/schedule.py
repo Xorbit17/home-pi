@@ -26,8 +26,6 @@ class _Window:
     end_min: int      # exclusive
     mode: str
 
-# ==== Models =================================================================
-
 class Display(models.Model):
     """
     A physical e-ink frame (or logical display).
@@ -45,7 +43,7 @@ class Display(models.Model):
     )
     timezone = models.CharField(max_length=64, default="Europe/Brussels")
     default_mode = models.CharField(max_length=16, choices=MODE_CHOICES, default=PHOTO_MODE)
-    override_mode = models.CharField(max_length=16, choices=MODE_CHOICES, null=True, blank=True)
+    override_mode = models.CharField(max_length=16, choices=MODE_CHOICES, null=True, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -113,8 +111,6 @@ class WeeklyRule(models.Model):
                     f"Overlaps with rule: {other.start_time.strftime('%H:%M')}-"
                     f"{other.end_time.strftime('%H:%M') if other.end_time != time(0,0) else '24:00'}"
                 )
-
-    # ---- resolution utilities -------------------------------------------------
 
     @staticmethod
     def _windows_for_day(display: Display, weekday: int) -> list[_Window]:
