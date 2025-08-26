@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # How many seconds to wait between runs
-INTERVAL=10
+INTERVAL=30
 
 while true; do
     python manage.py job_tick
