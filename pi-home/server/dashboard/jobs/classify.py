@@ -4,8 +4,8 @@ import os
 import random
 
 from dashboard.models.job import Job
-from dashboard.models.application import SourceImage
-from dashboard.jobs.logger_job import RunLogger
+from dashboard.models.photos import SourceImage
+from dashboard.jobs.services.logger_job import RunLogger
 from dashboard.constants import (
     IMAGE_DIR,
     IMAGE_EXTENSIONS,

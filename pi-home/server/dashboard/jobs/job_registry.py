@@ -8,7 +8,7 @@ from typing import Optional, Dict, cast
 from django.db import transaction
 from pydantic import BaseModel
 
-from dashboard.jobs.logger_job import RunLogger
+from dashboard.jobs.services.logger_job import RunLogger
 
 Handler = Callable[[Job, RunLogger, Any], str | None]
 
@@ -76,8 +76,10 @@ def start_execution_queued(execution: Execution):
 
     logger = RunLogger(job, execution)
     handler = get_handler(cast(JobKind,job.kind))
+    validator = get_validator(cast(JobKind,job.kind))
+    params  = validator.model_validate(execution.params) if validator else {}
     try:
-        handler(job, logger, execution.params)
+        handler(job, logger, params)
         logger._close_success("Job execution succeeded")
     except Exception as e:
         logger._close_error(e, "Job execution failed")

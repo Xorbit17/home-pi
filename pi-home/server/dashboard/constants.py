@@ -83,6 +83,7 @@ ART = "ART"
 NEWSPAPER = "NEWSPAPER"
 CLASSIFY = "CLASSIFY"
 MANUAL_TRIGGER = "MANUAL_TRIGGER"
+DUMMY = "DUMMY"
 
 JOB_KIND_CHOICES = [
     (CALENDAR, "Get calendar"),
@@ -92,7 +93,8 @@ JOB_KIND_CHOICES = [
     (ART, "Generate art"),
     (NEWSPAPER, "Generate newspaper"),
     (CLASSIFY, "Classify image"),
-    (MANUAL_TRIGGER, "Manually triggered")
+    (MANUAL_TRIGGER, "Manually triggered"),
+    (DUMMY, "Dummy job to test the scheduler and the commands")
 ]
 
 JobKind: TypeAlias = Literal[
@@ -103,7 +105,8 @@ JobKind: TypeAlias = Literal[
     "ART",
     "NEWSPAPER",
     "CLASSIFY",
-    "MANUAL_TRIGGER"
+    "MANUAL_TRIGGER",
+    "DUMMY"
 ]
 
 RUNNING = "RUNNING"

@@ -5,16 +5,18 @@ from dashboard.jobs.image_processing_declaration import RenderDecision, KEEP_PHO
 from pathlib import Path
 from dashboard.jobs.job_registry import register
 from dashboard.models.job import Job
-from dashboard.models.application import SourceImage, Variant
-from dashboard.jobs.logger_job import RunLogger
+from dashboard.models.photos import SourceImage, Variant
+from dashboard.jobs.services.logger_job import RunLogger
 from pydantic import BaseModel
 from dashboard.jobs.services.generate_art import run_art_generation_pipeline, ImageProcessingContext
 from dashboard.jobs.services.classify_image import ImageClassification
 from random import random, choice
-from typing import cast
+from typing import cast, Optional
+from dashboard.jobs.services.scoring import calculate_static_score
 
 class GenerateVariantParams(BaseModel):
     source_image_id: int
+    art_style_force: Optional[ArtStyle]
 
 def decide_art_style(classification: ImageClassification) ->  ArtStyle:
     if (classification.renderDecision == "LEAVE_PHOTO"):
@@ -45,14 +47,29 @@ def generate_variant(job: Job, logger: RunLogger, params: GenerateVariantParams 
         raise RuntimeError("Image has not been calassified yet. Cannot create variant")
     classification = ImageClassification.model_validate(src.classification)
     logger.debug(f"Starting generation of variant of source image with id {src.pk}")
-    newVariant = Variant.objects.create(
-        source_image=src,
-    )
+
     input = Path(src.path)
     art_style = decide_art_style(classification)
     art_styles = ALL_ART_STYLES.get(classification.contentType)
+    
     if not art_styles:
         raise RuntimeError('Impossible')
+    
+    photorealist = True
+    if (classification.art or classification.cartoony):
+        photorealist = False
+    if (art_style != KEEP_PHOTO):
+        photorealist = False
+        
+    newVariant = Variant.objects.create(
+        source_image=src,
+        score=calculate_static_score(
+            classification.quality,
+            classification.contentType,
+            photorealist
+        )
+    )
+
     pipeline_info = next(t for t in art_styles if t[0]==art_style)
     context = ImageProcessingContext(
         classification=classification,
