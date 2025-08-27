@@ -1,4 +1,3 @@
-# dashboard/management/commands/seed.py
 from __future__ import annotations
 
 from django.core.management.base import BaseCommand

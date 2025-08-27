@@ -9,3 +9,6 @@ openai
 pillow
 pillow-heif
 pydantic
+psutil
+docker
+
