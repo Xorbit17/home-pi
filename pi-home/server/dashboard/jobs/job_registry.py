@@ -8,7 +8,7 @@ from typing import Optional, Dict, cast
 from django.db import transaction
 from pydantic import BaseModel
 
-from dashboard.jobs.services.logger_job import RunLogger
+from dashboard.services.logger_job import RunLogger
 
 Handler = Callable[[Job, RunLogger, Any], str | None]
 

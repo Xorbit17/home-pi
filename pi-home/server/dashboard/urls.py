@@ -1,10 +1,10 @@
 from django.urls import path
-from .views import home, photo, dashboard
+from dashboard.views.dashboard import DashboardView
+from dashboard.views.home import HomeView
+from dashboard.views.photo import PhotoView
 
 urlpatterns = [
-    path("", home, name="home"),  # matches "/"
-    path("dashboard", dashboard, name="dashboard"),
-    # path("forecast", forecast, name="forecast"),
-    # path("news", news, name="news"),
-    path("photo", photo, name="photo"),
+    path("", HomeView.as_view(), name="home"),  # matches "/"
+    path("dashboard", DashboardView.as_view(), name="dashboard"),
+    path("photo", PhotoView.as_view(), name="photo"),
 ]

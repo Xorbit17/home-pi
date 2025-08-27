@@ -106,7 +106,12 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Brussels'
+
+DATETIME_FORMAT = "Y-m-d H:i"
+READ_DATETIME_FORMAT = "l d/m/Y H:i"
+DATE_FORMAT = "d/m/Y"
+TIME_FORMAT = "H:i"
 
 USE_I18N = True
 

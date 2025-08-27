@@ -5,12 +5,12 @@ import random
 
 from dashboard.models.job import Job
 from dashboard.models.photos import SourceImage
-from dashboard.jobs.services.logger_job import RunLogger
+from dashboard.services.logger_job import RunLogger
 from dashboard.constants import (
     IMAGE_DIR,
     IMAGE_EXTENSIONS,
 )
-from dashboard.jobs.services.classify_image import classify_image
+from dashboard.services.classify_image import classify_image
 from dashboard.jobs.job_registry import register
 from PIL import Image
 import json

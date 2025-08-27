@@ -1,14 +1,17 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Literal
 import docker
 
 
 @dataclass
+@dataclass
 class ContainerHealth:
+    id: str
     name: str
-    status: str             # container state, e.g. "running", "exited"
-    health: Optional[str]   # "healthy", "unhealthy", "starting", or None if no healthcheck
+    status: Literal["created","running","restarting","removing","paused","exited","dead"]
+    health: Literal["starting","healthy","unhealthy","none"]
+    mem_usage: int
 
 
 def get_container_health() -> List[ContainerHealth]:
@@ -20,11 +23,15 @@ def get_container_health() -> List[ContainerHealth]:
 
     for c in client.containers.list(all=True):
         state = c.attrs.get("State", {})
-        health = state.get("Health")
+        stats = c.stats(stream=False)
         containers.append(ContainerHealth(
+            id=c.id,
             name=c.name,
             status=state.get("Status", "unknown"),
-            health=health.get("Status") if health else None,
+            health=state.get("Health","unknown"),
+            mem_usage=stats["memory_stats"]["usage"],
         ))
 
     return containers
+
+

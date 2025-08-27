@@ -6,13 +6,13 @@ from pathlib import Path
 from dashboard.jobs.job_registry import register
 from dashboard.models.job import Job
 from dashboard.models.photos import SourceImage, Variant
-from dashboard.jobs.services.logger_job import RunLogger
+from dashboard.services.logger_job import RunLogger
 from pydantic import BaseModel
-from dashboard.jobs.services.generate_art import run_art_generation_pipeline, ImageProcessingContext
-from dashboard.jobs.services.classify_image import ImageClassification
+from dashboard.services.generate_art import run_art_generation_pipeline, ImageProcessingContext
+from dashboard.services.classify_image import ImageClassification
 from random import random, choice
 from typing import cast, Optional
-from dashboard.jobs.services.scoring import calculate_static_score
+from dashboard.services.scoring import calculate_static_score
 
 class GenerateVariantParams(BaseModel):
     source_image_id: int

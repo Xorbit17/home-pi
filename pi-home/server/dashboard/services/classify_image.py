@@ -1,5 +1,5 @@
 from __future__ import annotations
-from dashboard.jobs.services.openai import openai_client
+from dashboard.services.openai import openai_client
 from dashboard.constants import (
     IMAGE_DIR,
     IMAGE_EXTENSIONS,
@@ -10,7 +10,7 @@ from dashboard.jobs.image_processing_declaration import (
     QualityClassification,
     RenderDecision,
 )
-from dashboard.jobs.services.image_processing import file_to_base64
+from dashboard.services.image_processing import file_to_base64
 from pathlib import Path
 import base64
 from pydantic import BaseModel
@@ -18,7 +18,7 @@ from openai import BadRequestError
 
 
 CLASSIFY_PROMPT = (
-    Path(__file__).resolve().parent.parent / "context-templates" / "image-classifier.md"
+    Path(__file__).resolve().parent.parent / "context_templates" / "image-classifier.md"
 ).read_text()
 
 class ImageClassification(BaseModel):

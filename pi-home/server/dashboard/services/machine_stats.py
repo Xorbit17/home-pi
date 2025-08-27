@@ -5,6 +5,16 @@ from dashboard.models.application import MinuteSystemSample
 from dataclasses import dataclass
 from typing import List, Optional
 
+@dataclass
+class DiskStat:
+    device: str
+    mount: str
+    fstype: str
+    total: int
+    used: int
+    free: int
+    percent: float
+
 def disk_usage_snapshot():
     disks = []
     for part in psutil.disk_partitions(all=False):

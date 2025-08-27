@@ -2,20 +2,20 @@ from typing import Dict, Iterable, List, Sequence, Tuple, Optional, Union, Proto
 from PIL import Image
 from pathlib import Path
 from django.template import Context, Template
-from dashboard.jobs.services.openai import openai_client
-from dashboard.jobs.services.image_processing import pil_to_base64, base64_to_pil
+from dashboard.services.openai import openai_client
+from dashboard.services.image_processing import pil_to_base64, base64_to_pil
 from dashboard.jobs.image_processing_declaration import ART_STYLE_CHOICES, CONTENT_TYPE_MARKDOWN, CONTENT_TYPE_CLASSIFICATION_CHOICES, PipelineArgs, PipelineSteps, ArtStyle
 from typing import Any, Callable, Iterable, List, Optional, Sequence, Tuple
 from dataclasses import dataclass, field
 from pydantic import BaseModel
 from PIL import Image
-from dashboard.jobs.services.classify_image import ImageClassification
+from dashboard.services.classify_image import ImageClassification
 
 RGB = Tuple[int, int, int]
 ART_GENERATOR_PROMPT_TEMPLATE = Template(
     (
         Path(__file__).resolve().parent.parent
-        / "context-templates"
+        / "context_templates"
         / "image-artstyle-applicator.md"
     ).read_text(),
 )

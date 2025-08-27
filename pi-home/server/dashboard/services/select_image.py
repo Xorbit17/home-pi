@@ -3,7 +3,7 @@
 from django.utils import timezone
 
 
-from dashboard.jobs.services.scoring import calculate_final_score
+from dashboard.services.scoring import calculate_final_score
 from dashboard.models.photos import Variant
 from typing import Iterable, List, Tuple
 import os

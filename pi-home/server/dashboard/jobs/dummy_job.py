@@ -1,5 +1,5 @@
 from dashboard.jobs.job_registry import register
-from dashboard.jobs.services.logger_job import RunLogger
+from dashboard.services.logger_job import RunLogger
 from pydantic import BaseModel, PositiveInt
 from typing import Optional
 from time import sleep

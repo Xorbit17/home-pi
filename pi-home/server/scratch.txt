@@ -1,25 +1,4 @@
-from django.shortcuts import render
-from django.http import FileResponse, Http404
-from django.views.decorators.http import require_GET
-from .models.weather import Forecast
-from dashboard.jobs.services.select_image import get_variant
-import os
-import mimetypes
-from django.utils import timezone
-from datetime import timedelta
-
-
-
-def home(request):
-    return render(
-        request, "dashboard/home.html", {"msg": "Hello from Django templates"}
-    )
-
-
-def dashboard(request):
-    now = timezone.now()
-
-    static_fake_data = {
+static_fake_data = {
         "header": {
             "hostname": "raspi-pi5",
             "now": now,
@@ -159,37 +138,3 @@ def dashboard(request):
             ],
         },
     }
-
-    return render(request, "dashboard/dashboard.html", static_fake_data)
-
-
-def forecast(request):
-    forecasts = Forecast.objects.all()[:24]  # cap for now
-    return render(request, "dashboard/forecast.html", {"forecasts": forecasts})
-
-
-def news(request):
-    return render(request, "dashboard/news.html")
-
-
-@require_GET
-def photo(request):
-    """
-    Returns one image (as raw bytes) chosen by final score.
-    """
-    try:
-        chosen = get_variant()
-    except Exception:
-        raise Http404("Failed to select an image.")
-
-    path = chosen.path
-    if not path or not os.path.exists(path):
-        raise Http404("Image file not found on disk.")
-
-    ctype, _ = mimetypes.guess_type(path)
-    ctype = ctype or "application/octet-stream"
-
-    resp = FileResponse(open(path, "rb"), content_type=ctype)
-    # Dynamic content; avoid caching on the client/display unless you want it
-    resp["Cache-Control"] = "no-store"
-    return resp
