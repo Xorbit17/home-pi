@@ -6,6 +6,7 @@ from dashboard.services.machine_stats import MachineStats
 from dashboard.services.docker_health import ContainerHealth
 from django.shortcuts import render
 from django.views import View
+from django.utils import timezone
 
 
 @dataclass
@@ -52,6 +53,8 @@ class DiskStat:
     disk_name: str
     disk_used_percent: float
     disk_unused_percent: float
+    used: int
+    total: int
 
 
 @dataclass
@@ -64,7 +67,7 @@ class DashboardDisks:
 class GraphStat:
     id: str
     color: str
-    labels: List[datetime]
+    labels: List[int]
     values: List[float]
 
 
@@ -100,7 +103,7 @@ class DashboardData:
     docker: DashboardDockerHealth
 
 
-now = datetime.now()
+now = timezone.now()
 
 dashboard_data = DashboardData(
     header=DashboardHeader(
@@ -142,60 +145,64 @@ dashboard_data = DashboardData(
                 disk_name="/dev/sda1",
                 disk_used_percent=78.2,
                 disk_unused_percent=21.8,
+                used=10,
+                total=100,
             ),
             DiskStat(
                 id="sdb",
                 disk_name="/dev/sdb1",
                 disk_used_percent=45.0,
                 disk_unused_percent=55.0,
+                used=10,
+                total=100,
             ),
         ],
     ),
     stats=DashboardStats(
         memory=DashboardStat(
             updated_at=now,
-            stat_id_and_grid="memory-stat",
+            stat_id_and_grid="memory",
             stat_icon_path="svg/tabler/device-sd-card.svg",
             stat_title="Memory Usage",
             graph_data=[
                 GraphStat(
                     id="mem",
                     color="blue",
-                    labels=[now - timedelta(minutes=i) for i in range(10, 0, -1)],
+                    labels=list(range(10)),
                     values=[40 + i * 0.5 for i in range(10)],  # fake %
                 )
             ],
         ),
         cpu=DashboardStat(
             updated_at=now,
-            stat_id_and_grid="cpu-stat",
+            stat_id_and_grid="cpu",
             stat_icon_path="svg/tabler/cpu.svg",
             stat_title="CPU Usage",
             graph_data=[
                 GraphStat(
                     id="cpu",
                     color="green",
-                    labels=[now - timedelta(minutes=i) for i in range(10, 0, -1)],
+                    labels=list(range(10)),
                     values=[10 + i * 2 for i in range(10)],  # fake %
                 )
             ],
         ),
         network=DashboardStat(
             updated_at=now,
-            stat_id_and_grid="net-stat",
+            stat_id_and_grid="network",
             stat_icon_path="svg/tabler/arrows-left-right.svg",
             stat_title="Network Traffic",
             graph_data=[
                 GraphStat(
                     id="net-up",
                     color="orange",
-                    labels=[now - timedelta(minutes=i) for i in range(10, 0, -1)],
+                    labels=list(range(10)),
                     values=[i * 5 for i in range(10)],  # fake kbps
                 ),
                 GraphStat(
                     id="net-down",
                     color="purple",
-                    labels=[now - timedelta(minutes=i) for i in range(10, 0, -1)],
+                    labels=list(range(10)),
                     values=[50 - i * 3 for i in range(10)],  # fake kbps
                 ),
             ],

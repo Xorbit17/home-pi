@@ -3,6 +3,7 @@ from django.contrib.staticfiles import finders
 from django.utils.safestring import mark_safe
 from pathlib import Path
 from typing import cast
+import re
 
 register = template.Library()
 

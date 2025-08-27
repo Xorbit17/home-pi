@@ -1,7 +1,5 @@
-{% with 
-    updated_at=disks.updated_at
-    items=disks.items
-%}
+{% load svg %}
+{% with updated_at=disks.updated_at %}
 <section class="card disk" aria-label="disks">
     <header class="section-header">
         <h2><span class="icon">{% svg "svg/tabler/database.svg" %}</span> Disks</h2>
@@ -9,7 +7,7 @@
     </header>
 
     <div class="disk-list">
-        {% for d in items %}
+        {% for d in disks.disks %}
         <div class="disk-item">
             <canvas
                 class="disk-canvas"
@@ -18,7 +16,7 @@
                 height="96">
             </canvas>
             <div class="disk-info">
-                <p class="subtitle">{{ d.name }}</p>
+                <p class="subtitle">{{ d.disk_name }}</p>
                 <p>U: {{d.used|floatformat:1}}GB/</p>
                 <p>T: {{d.total|floatformat:1}}GB</p>
             </div>

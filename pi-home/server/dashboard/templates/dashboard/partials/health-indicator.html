@@ -1,49 +1,34 @@
 {% load svg %}
-
-{# ---- Container lifecycle states ---- #}
 {% if status == "created" %}
-  <span class="icon icon-gray">{% svg "svg/tabler/circle-plus.svg" %}</span>
+ <span class="icon icon-gray">{% svg "svg/tabler/circle-plus.svg" %}</span>
 {% endif %}
-
 {% if status == "running" %}
-  <span class="icon icon-green">{% svg "svg/tabler/player-play.svg" %}</span>
+ <span class="icon icon-green">{% svg "svg/tabler/player-play.svg" %}</span>
 {% endif %}
-
 {% if status == "restarting" %}
-  <span class="icon icon-yellow">{% svg "svg/tabler/rotate.svg" %}</span>
+ <span class="icon icon-yellow">{% svg "svg/tabler/rotate.svg" %}</span>
 {% endif %}
-
 {% if status == "removing" %}
-  <span class="icon icon-red">{% svg "svg/tabler/trash.svg" %}</span>
+ <span class="icon icon-red">{% svg "svg/tabler/trash.svg" %}</span>
 {% endif %}
-
 {% if status == "paused" %}
-  <span class="icon icon-blue">{% svg "svg/tabler/player-pause.svg" %}</span>
+ <span class="icon icon-blue">{% svg "svg/tabler/player-pause.svg" %}</span>
 {% endif %}
-
 {% if status == "exited" %}
-  <span class="icon icon-gray">{% svg "svg/tabler/player-stop.svg" %}</span>
+ <span class="icon icon-gray">{% svg "svg/tabler/player-stop.svg" %}</span>
 {% endif %}
-
 {% if status == "dead" %}
-  <span class="icon icon-red">{% svg "svg/tabler/skull.svg" %}</span>
+ <span class="icon icon-red">{% svg "svg/tabler/skull.svg" %}</span>
 {% endif %}
-
-
-{# ---- Health check states ---- #}
 {% if status == "starting" %}
-  <span class="icon icon-yellow">{% svg "svg/tabler/clock.svg" %}</span>
+ <span class="icon icon-yellow">{% svg "svg/tabler/clock.svg" %}</span>
 {% endif %}
-
 {% if status == "healthy" %}
-  <span class="icon icon-green">{% svg "svg/tabler/heartbeat.svg" %}</span>
+ <span class="icon icon-green">{% svg "svg/tabler/heartbeat.svg" %}</span>
 {% endif %}
-
 {% if status == "unhealthy" %}
-  <span class="icon icon-red">{% svg "svg/tabler/heart-broken.svg" %}</span>
+ <span class="icon icon-red">{% svg "svg/tabler/heart-broken.svg" %}</span>
 {% endif %}
-
 {% if status == "none" %}
-  <span class="icon icon-gray">{% svg "svg/tabler/ban.svg" %}</span>
+ <span class="icon icon-gray">{% svg "svg/tabler/ban.svg" %}</span>
 {% endif %}
-

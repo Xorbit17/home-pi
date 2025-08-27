@@ -1,10 +1,6 @@
 
 {% load svg %}
-{% with 
-    updated_at = docker.updated_at
-    containers = docker.containers
-    total_mem = docker.total_mem
-%}
+{% with updated_at=docker.updated_at containers=docker.containers total_mem=docker.total_mem %}
 
 <section class="card docker" aria-label="docker">
     <header class="section-header">

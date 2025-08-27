@@ -1,9 +1,6 @@
 {% load svg %}
 {% load util %}
-{% with 
-    updated_at=weather.updated_at
-    days=weather.days
-%}
+{% with updated_at=weather.updated_at days=weather.days %}
 
 <section class="card weather" aria-label="weather">
     <header class="section-header">
@@ -23,7 +20,7 @@
                 <span>Wind: {{ day.wind_bft }}</span>
                 <span>Rain: {{ day.rain_chance_percent }}%</span>
             </div>
-            {% include "dashboard/partials/weather-icon" weather_icon=day.icon%}
+            {% include "dashboard/partials/weather-icon.html" with weather_icon=day.icon%}
         </article>
         {% endfor %}
     </div>

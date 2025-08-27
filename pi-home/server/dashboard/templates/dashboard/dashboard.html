@@ -17,86 +17,78 @@
     <div class="dashboard-container">
         <main class="grid">
             {% include "dashboard/partials/header.html" with header=header alerts=alerts %}
-
             {% include "dashboard/partials/weather.html" with weather=weather %}
-
             {% include "dashboard/partials/disks.html" with disks=disks %}
-
-            {% include "dashboard/partials/stat_graph.html" with
-                stats=stats.memory
-            %}
-
-            {% include "dashboard/partials/stat_graph.html" with
-                stats=stats.cpu
-            %}
-
-            {% include "dashboard/partials/stat_graph.html" with
-                stats=stats.network
-            %}
-
+            {% include "dashboard/partials/stat_graph.html" with stats=stats.memory %}
+            {% include "dashboard/partials/stat_graph.html" with stats=stats.cpu %}
+            {% include "dashboard/partials/stat_graph.html" with stats=stats.network %}
             {% comment %} {% include "dashboard/partials/transmission.html" %} {% endcomment %}
-
             {% include "dashboard/partials/docker.html" with docker=docker%}
-
             {% comment %} {% include "dashboard/partials/calendar.html" with calendar=calendar%} {% endcomment %}
-
         </main>
     </div>
     <script>
         Chart.defaults.backgroundColor = '#FFFFFF';
         Chart.defaults.borderColor = '#36A2EB';
         Chart.defaults.color = '#000';
+        Chart.defaults.plugins.legend.display = false;
+        Chart.defaults.scale.grid.color = '#dddddd'
         const options = { 
-            responsive: false, 
             animation: false,
             devicePixelRatio: 1,
         };
 
         // Disks
-        const disks = JSON.parse(document.getElementById("disks-graph-data").textContent)
+        const disks = JSON.parse(document.getElementById("disks-graph-data").textContent);
         const systemStats = {
             mem: JSON.parse(document.getElementById("memory-graph-data").textContent),
-            cpu: JSON.parse(document.getElementById("memory-graph-data").textContent),
-            network: JSON.parse(document.getElementById("memory-graph-data").textContent),
+            cpu: JSON.parse(document.getElementById("cpu-graph-data").textContent),
+            network: JSON.parse(document.getElementById("network-graph-data").textContent),
         }
-        const diskLabels = [
-                "Used",
-                "Unused",
-            ]
-        const diskBackgroundColor = ['#0000ff','#8080ff'];
-        for (const d of disks ) {
+        const diskBackgroundColor = ['#00ff00','#80ff80'];
+        for (const d of disks.disks) {
             const data = {
-                labels: diskLabels
-                datasets: [{
-                    data: [d.disk_used_pct,d.disk_unused_pct],
-                    backgroundColor: diskBackgroundColor,
-                }]
+                datasets: [
+                    {
+                        data: [d.disk_used_percent, d.disk_unused_percent],
+                        backgroundColor: diskBackgroundColor,
+                    },
+                ],
             };
             new Chart(
                 document.getElementById(`disk-canvas-${d.id}`),
-                config: {
+                {
                     type: 'doughnut',
                     data,
-                    options,
+                    options: {...options, responsive: false},
                 },
             );
         }
         // Usage graphs
         for (const stats of Object.values(systemStats)) {
-            const data = {
-                datasets: stats.graph_data.map((gd) => {
-                    data: values,
-                    backgroundColor: gd.color,
-                })
-            };
-            new Chart(
-                document.getElementById(`stat-graph-canvas-${stat.stat_id_and_grid}`),
-                config: {
-                    type: 'line',
-                    data,
-                    options,
-                },
-            );
+            for (const graphData of stats.graph_data) {
+                const graphId = `stat-graph-canvas-${ stats.stat_id_and_grid }-${graphData.id}`
+                const data = {
+                    labels: graphData.labels,
+                    datasets: [{
+                        data: graphData.values,
+                        borderColor: graphData.color
+                    }]
+                };
+                new Chart(
+                    document.getElementById(graphId),
+                    {
+                        type: 'line',
+                        data,
+                        options: {
+                            ...options, 
+                            responsive: true,
+                            pointStyle: false,
+                        },
+                    },
+                );
+            }
+
         }
     </script>
 </body>
