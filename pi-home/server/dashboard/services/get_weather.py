@@ -163,6 +163,117 @@ def get_weather(location: Tuple[str,str]):
     api_key = OPENWEATHERMAP_KEY
     return fetch_weather(lat,lon,api_key)
 
+OWM_DESCRIPTION_TO_ICON = {
+    # Thunderstorm (2xx)
+    "thunderstorm with light rain": "thunderstorms-rain.svg",
+    "thunderstorm with rain": "thunderstorms-rain.svg",
+    "thunderstorm with heavy rain": "thunderstorms-extreme-rain.svg",
+    "light thunderstorm": "thunderstorms.svg",
+    "thunderstorm": "thunderstorms.svg",
+    "heavy thunderstorm": "thunderstorms-extreme.svg",
+    "ragged thunderstorm": "thunderstorms.svg",
+    "thunderstorm with light drizzle": "thunderstorms-rain.svg",
+    "thunderstorm with drizzle": "thunderstorms-rain.svg",
+    "thunderstorm with heavy drizzle": "thunderstorms-extreme-rain.svg",
+
+    # Drizzle (3xx)
+    "light intensity drizzle": "drizzle.svg",
+    "drizzle": "drizzle.svg",
+    "heavy intensity drizzle": "drizzle.svg",
+    "light intensity drizzle rain": "drizzle.svg",
+    "drizzle rain": "drizzle.svg",
+    "heavy intensity drizzle rain": "drizzle.svg",
+    "shower rain and drizzle": "drizzle.svg",
+    "heavy shower rain and drizzle": "drizzle.svg",
+    "shower drizzle": "drizzle.svg",
+
+    # Rain (5xx)
+    "light rain": "rain.svg",
+    "moderate rain": "rain.svg",
+    "heavy intensity rain": "extreme-rain.svg",
+    "very heavy rain": "extreme-rain.svg",
+    "extreme rain": "extreme-rain.svg",
+    "freezing rain": "sleet.svg",
+    "light intensity shower rain": "rain.svg",
+    "shower rain": "rain.svg",
+    "heavy intensity shower rain": "extreme-rain.svg",
+    "ragged shower rain": "rain.svg",
+
+    # Snow (6xx)
+    "light snow": "snow.svg",
+    "snow": "snow.svg",
+    "heavy snow": "extreme-snow.svg",
+    "sleet": "sleet.svg",
+    "light shower sleet": "sleet.svg",
+    "shower sleet": "sleet.svg",
+    "light rain and snow": "sleet.svg",
+    "rain and snow": "sleet.svg",
+    "light shower snow": "snow.svg",
+    "shower snow": "snow.svg",
+    "heavy shower snow": "extreme-snow.svg",
+
+    # Atmosphere (7xx)
+    "mist": "mist.svg",
+    "smoke": "smoke.svg",
+    "haze": "haze.svg",
+    "sand/dust whirls": "dust.svg",
+    "fog": "fog.svg",
+    "sand": "dust.svg",
+    "dust": "dust.svg",
+    "volcanic ash": "extreme.svg",
+    "squalls": "wind.svg",
+    "tornado": "tornado.svg",
+
+    # Clear (800)
+    "clear sky": "clear-day.svg",
+
+    # Clouds (80x)
+    "few clouds: 11-25%": "partly-cloudy-day.svg",
+    "scattered clouds: 25-50%": "partly-cloudy-day.svg",
+    "broken clouds: 51-84%": "overcast-day.svg",
+    "overcast clouds: 85-100%": "overcast.svg",
+}
+
+def get_icon_from_description(description:str) -> str:
+    result = OWM_DESCRIPTION_TO_ICON.get(description, None)
+    if not result:
+        raise Exception(f"Corresponding icon not found for open weather description '{description}'")
+    return result
+
+dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+def get_direction_letter_from_wind_dir(dir: float) -> str:
+    deg = dir % 360
+    idx = int((deg + 22.5) // 45) % 8
+    return dirs[idx]
+
+bft_scale = [
+    (0.3, 0, "Calm"),
+    (1.6, 1, "Light air"),
+    (3.4, 2, "Light breeze"),
+    (5.5, 3, "Gentle breeze"),
+    (8.0, 4, "Moderate breeze"),
+    (10.8, 5, "Fresh breeze"),
+    (13.9, 6, "Strong breeze"),
+    (17.2, 7, "Near gale"),
+    (20.8, 8, "Gale"),
+    (24.5, 9, "Strong gale"),
+    (28.5, 10, "Storm"),
+    (32.7, 11, "Violent storm"),
+]
+
+def wind_ms_to_beaufort(speed: float) -> tuple[int, str]:
+    """
+    Convert wind speed (m/s) into the Beaufort scale (0–12) and description.
+    Returns (scale, description).
+    """
+
+    for limit, num, desc in bft_scale:
+        if speed < limit:
+            return num, desc
+    return 12, "Hurricane force"
+
+
+
 
 
 
