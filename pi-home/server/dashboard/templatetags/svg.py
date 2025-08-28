@@ -6,6 +6,22 @@ from typing import cast
 
 register = template.Library()
 
+csv_cache = {}
+
+def get_cached(path):
+    result = csv_cache.get(path)
+    if result:
+        return result
+    abs_path: str | None = cast(str | None,finders.find(path, False))
+
+    if not abs_path:
+        return f"<!-- svg not found: {path} -->"
+    data = Path(abs_path).read_text()
+    csv_cache[path] = data
+    return data
+
+
+
 @register.simple_tag
 def svg(path, css_class=""):
     """
@@ -13,11 +29,7 @@ def svg(path, css_class=""):
     Ensures stroke/fill use currentColor so CSS can control color.
     Usage: {% svg 'icons/tabler/sun.svg' 'icon text-blue' %}
     """
-    abs_path: str | None = cast(str | None,finders.find(path, False))
-    if not abs_path:
-        return f"<!-- svg not found: {path} -->"
-    data = Path(abs_path).read_text()
-    # Inject class
+    data = get_cached(path)
     if css_class:
         data = data.replace("<svg", f'<svg class="{css_class}"', 1)
 

@@ -135,6 +135,24 @@ dashboard_data = DashboardData(
                 rain_chance_percent=60,
                 icon="rain.svg",
             ),
+            WeatherDay(
+                label="Wednesday",
+                tmax=19.1,
+                tmin=12.0,
+                summary="Light rain showers",
+                wind_bft=4,
+                rain_chance_percent=60,
+                icon="rainbow.svg",
+            ),
+            WeatherDay(
+                label="Thursday",
+                tmax=19.1,
+                tmin=12.0,
+                summary="Light rain showers",
+                wind_bft=4,
+                rain_chance_percent=60,
+                icon="hail.svg",
+            ),
         ],
     ),
     disks=DashboardDisks(
@@ -236,4 +254,34 @@ dashboard_data = DashboardData(
 
 class DashboardView(View):
     def get(self, request):
+        now = timezone.now()
+        # Get alerts; for now empty list
+        header = DashboardHeader(
+            hostname="Raspberrypi",
+            generated_at=now,
+            alerts=[]
+        )
+        weather=DashboardWeather(
+            updated_at=now,
+            days=[
+                WeatherDay(
+                    label="Monday",
+                    tmax=23.5,
+                    tmin=15.2,
+                    summary="Sunny with light clouds",
+                    wind_bft=3,
+                    rain_chance_percent=10,
+                    icon="clear-day.svg",
+                ),
+                WeatherDay(
+                    label="Tuesday",
+                    tmax=19.1,
+                    tmin=12.0,
+                    summary="Light rain showers",
+                    wind_bft=4,
+                    rain_chance_percent=60,
+                    icon="rain.svg",
+                ),
+            ],
+        ),
         return render(request, "dashboard/dashboard.html", context=asdict(dashboard_data))

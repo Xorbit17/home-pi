@@ -503,13 +503,6 @@ body {
     vertical-align: middle;
 }
 
-.weather-icon svg {
-    width: 100%;
-    height: 100%;
-    stroke: currentColor;
-    fill: none;
-}
-
 .icon-red { color: var(--red) }
 .icon-green { color: var(--green) }
 .icon-blue { color: var(--blue) }
