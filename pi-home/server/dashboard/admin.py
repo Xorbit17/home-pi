@@ -1,7 +1,7 @@
 from django.contrib import admin
 from dashboard.models.photos import SourceImage, Variant
 from dashboard.models.job import Job, Execution, JobLogEntry
-
+from dashboard.models.weather import Location, WeatherDetail, DayForecast
 
 @admin.register(SourceImage)
 class SourceImageAdmin(admin.ModelAdmin):
@@ -43,3 +43,21 @@ class JobLogEntryAdmin(admin.ModelAdmin):
     list_filter = ("level",)
     search_fields = ("message",)
     readonly_fields = ["execution","ts","level","message","context","seq","created_at"]
+
+@admin.register(Location)
+class LocationAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in Location._meta.fields]
+    search_fields = ["name"]  # adjust if you have a name/label field
+
+
+@admin.register(DayForecast)
+class DayForecastAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in DayForecast._meta.fields]
+    readonly_fields = ("created_at", "updated_at")
+    search_fields = ["location__id", "date"]
+    list_filter = ["location", "date", "generated_at"]
+
+
+@admin.register(WeatherDetail)
+class WeatherDetailAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in WeatherDetail._meta.fields]

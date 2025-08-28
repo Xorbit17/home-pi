@@ -1,5 +1,4 @@
 from dataclasses import dataclass, asdict
-from dashboard.models.weather import Forecast
 from typing import List, Tuple, Dict, Literal
 from datetime import datetime, timedelta
 from dashboard.services.machine_stats import MachineStats

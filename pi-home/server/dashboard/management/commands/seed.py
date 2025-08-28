@@ -4,7 +4,8 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from dashboard.models.job import Job 
-from dashboard.constants import CRON, CLASSIFY, ART, DUMMY
+from dashboard.models.weather import Location
+from dashboard.constants import CRON, CLASSIFY, ART, DUMMY, WEATHER
 
 
 class Command(BaseCommand):
@@ -34,6 +35,14 @@ class Command(BaseCommand):
                 "params": {},
             },
             {
+                "name": "get_weather",
+                "kind": WEATHER,
+                "job_type": CRON,
+                "cron": "55 5 * * *",    # every day at 05:45. Dashboard weather needs to be ready at 06:00
+                "enabled": True,
+                "params": {},
+            },
+            {
                 "name": "dummy-heartbeat",
                 "kind": DUMMY,
                 "job_type": CRON,
@@ -41,6 +50,15 @@ class Command(BaseCommand):
                 "enabled": True,
                 "params": {},
             },
+        ]
+
+        seed_locations= [
+            {
+                "name": "Blankenberge",
+                "country": "BE",
+                "latitude": "51°18'15.5\"N",
+                "longitude": "3°08'44.0\"E",
+            }
         ]
 
         created, updated = 0, 0
@@ -62,5 +80,24 @@ class Command(BaseCommand):
             else:
                 updated += 1
                 self.stdout.write(self.style.WARNING(f"Updated job: {obj.name}"))
+
+        for spec in seed_locations:
+            obj, was_created = Location.objects.update_or_create(
+                name=spec["name"],
+                country=spec["country"],
+                defaults={
+                    "latitude": spec["latitude"],
+                    "longitude": spec["longitude"]
+                },
+
+            )
+            if was_created:
+                created += 1
+                self.stdout.write(self.style.SUCCESS(f"Created Location: {obj.name}"))
+            else:
+                updated += 1
+                self.stdout.write(self.style.WARNING(f"Updated Location: {obj.name}"))
+
+        
 
         self.stdout.write(self.style.SUCCESS(f"Seeding complete. Created: {created}, Updated: {updated}"))

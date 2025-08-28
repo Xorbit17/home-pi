@@ -9,21 +9,19 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from zoneinfo import ZoneInfo
-from constants import MODE_CHOICES, NEWS_MODE, PHOTO_MODE, WEEKDAY_CHOICES
+from dashboard.constants import MODE_CHOICES, NEWS_MODE, PHOTO_MODE, WEEKDAY_CHOICES
 
 def _minutes_since_midnight(t: time) -> int:
-    """Treat 00:00 as 24:00 when used as an 'end' bound (handled by caller)."""
     return t.hour * 60 + t.minute
 
 def _end_minutes(end_t: time) -> int:
-    """Interpret end=00:00 as end-of-day (24:00)."""
     mins = _minutes_since_midnight(end_t)
     return 24 * 60 if mins == 0 else mins
 
 @dataclass
 class _Window:
-    start_min: int    # inclusive
-    end_min: int      # exclusive
+    start_min: int
+    end_min: int
     mode: str
 
 class Display(models.Model):
@@ -65,11 +63,6 @@ class Display(models.Model):
             self.save(update_fields=["override_mode", "override_expires_at"])
 
 class WeeklyRule(models.Model):
-    """
-    A single window for a specific weekday.
-    Example: Mon 00:00-09:00 -> news; Mon 09:00-12:00 -> photo; etc.
-    Duplicate multiple rules per weekday to build the day's schedule.
-    """
     display = models.ForeignKey(Display, on_delete=models.CASCADE, related_name="weekly_rules")
     weekday = models.IntegerField(choices=WEEKDAY_CHOICES)  # 0=Mon .. 6=Sun
     start_time = models.TimeField(help_text="Inclusive local start")
@@ -87,13 +80,12 @@ class WeeklyRule(models.Model):
             models.Index(fields=["display", "weekday", "active"]),
         ]
         ordering = ["display", "weekday", "start_time"]
-
-    # ---- validation: overlaps on same weekday/display ----
+    
     def clean(self):
         if self.start_time == self.end_time:
             raise ValidationError("start_time and end_time cannot be equal.")
 
-        # Overlap check (same display+weekday, active rules)
+        
         start_min = _minutes_since_midnight(self.start_time)
         end_min = _end_minutes(self.end_time)
 
@@ -126,20 +118,14 @@ class WeeklyRule(models.Model):
 
     @staticmethod
     def resolve_mode(display: Display, at: Optional[datetime] = None) -> str:
-        """
-        Decide which mode should be active right now for this display.
-        Honors temporary overrides; falls back to default_mode if no rule matches.
-        """
-        # Clear expired override if needed
         display.clear_expired_override()
 
-        # If an override is active, it wins
+        
         if display.override_mode and display.override_expires_at:
             now_utc = timezone.now()
             if now_utc < display.override_expires_at:
                 return display.override_mode
 
-        # Evaluate local schedule
         local_now = (at or timezone.now()).astimezone(display.tz)
         weekday = local_now.weekday()
         minutes = local_now.hour * 60 + local_now.minute
@@ -163,20 +149,17 @@ class WeeklyRule(models.Model):
 
         weekday = now_local.weekday()
         minutes = now_local.hour * 60 + now_local.minute
-
-        # Helper to build a local datetime for a given day/minute
+        
         def as_dt(day_offset: int, minute_mark: int) -> datetime:
             target_date = (now_local.date() + timedelta(days=day_offset))
             hh, mm = divmod(minute_mark, 60)
             return datetime(target_date.year, target_date.month, target_date.day, hh, mm, tzinfo=display.tz)
 
-        # Today: any window starting later today?
         todays = WeeklyRule._windows_for_day(display, weekday)
         for w in todays:
             if w.start_min > minutes:
                 return as_dt(0, w.start_min)
 
-        # Otherwise, find the first window tomorrow or later (scan up to a week)
         for step in range(1, 8):
             wd = (weekday + step) % 7
             wins = WeeklyRule._windows_for_day(display, wd)

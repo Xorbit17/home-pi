@@ -12,6 +12,7 @@
         {% for day in weather.days %}
         <article class="weather-card">
             <div class="wc-title">{{ day.label }}</div>
+            {% include "dashboard/partials/weather-icon.html" with weather_icon=day.icon%}
             <div class="wc-temp">
                 <span class="wc-tmax">{{ day.tmax }}°</span>
                 <span class="wc-tmin">{{ day.tmin }}°</span>
@@ -21,7 +22,7 @@
                 <span>Wind: {{ day.wind_bft }}</span>
                 <span>Rain: {{ day.rain_chance_percent }}%</span>
             </div>
-            {% include "dashboard/partials/weather-icon.html" with weather_icon=day.icon%}
+
         </article>
         {% endfor %}
     </div>

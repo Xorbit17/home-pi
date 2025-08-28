@@ -11,4 +11,5 @@ pillow-heif
 pydantic
 psutil
 docker
+requests
 
