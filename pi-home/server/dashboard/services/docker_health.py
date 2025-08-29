@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import List, Optional, Literal
+from typing import List, Optional, Literal, Dict
 import docker
 
 
@@ -23,13 +23,13 @@ def get_container_health() -> List[ContainerHealth]:
 
     for c in client.containers.list(all=True):
         state = c.attrs.get("State", {})
-        stats = c.stats(stream=False)
+        stats: Dict = c.stats(stream=False)
         containers.append(ContainerHealth(
             id=c.id,
             name=c.name,
             status=state.get("Status", "unknown"),
             health=state.get("Health","unknown"),
-            mem_usage=stats["memory_stats"]["usage"],
+            mem_usage=state.get("memory_stats", 0)
         ))
 
     return containers

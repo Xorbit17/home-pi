@@ -15,22 +15,22 @@ class DiskStat:
     free: int
     percent: float
 
-def disk_usage_snapshot():
+def disk_usage_snapshot() -> List[DiskStat]:
     disks = []
     for part in psutil.disk_partitions(all=False):
         try:
             usage = psutil.disk_usage(part.mountpoint)
         except PermissionError:
             continue
-        disks.append({
-            "device": part.device,
-            "mount": part.mountpoint,
-            "fstype": part.fstype,
-            "total": usage.total,
-            "used": usage.used,
-            "free": usage.free,
-            "percent": usage.percent,
-        })
+        disks.append(DiskStat(
+            device=part.device,
+            mount=part.mountpoint,
+            fstype=part.fstype,
+            total=usage.total,
+            used=usage.used,
+            free=usage.free,
+            percent=usage.percent,
+        ))
     return disks
 
 @dataclass

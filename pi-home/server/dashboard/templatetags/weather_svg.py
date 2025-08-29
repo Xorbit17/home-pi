@@ -20,7 +20,6 @@ size_map: Dict[IconSize,int] = {
 @register.simple_tag
 def weather_svg(icon_name: str, size: IconSize='LARGE'):
     """
-    Inline a weather SVG from STATICFILES.
     Usage: {% weather_icon forecast.icon "wicon wicon-96 text-blue" %}
     """
     size_px = size_map.get(size)

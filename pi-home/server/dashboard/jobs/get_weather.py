@@ -4,6 +4,7 @@ from time import sleep
 from django.utils import timezone
 from dashboard.models.weather import DayForecast, Location, WeatherDetail
 import dashboard.services.get_weather as weather_service
+from dashboard.services.util import convert_unix_dt_to_datetime, local_date
 import datetime
 from dataclasses import dataclass
 
@@ -11,15 +12,7 @@ from dataclasses import dataclass
 class Context:
     now: datetime.datetime
 
-def convert_unix_dt_to_datetime(unix):
-    dt_naive = datetime.datetime.fromtimestamp(unix)
-    return timezone.make_aware(dt_naive)
 
-def local_date(dt):
-    if timezone.is_naive(dt):
-        dt = timezone.make_aware(dt, timezone.utc)
-    dt_local = timezone.localtime(dt)
-    return dt_local.date()
 
 def process_record(input: weather_service.DailyItem, location: Location, context: Context):
     generated_at = context.now

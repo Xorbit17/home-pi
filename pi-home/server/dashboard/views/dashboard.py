@@ -1,11 +1,16 @@
 from dataclasses import dataclass, asdict
 from typing import List, Tuple, Dict, Literal
 from datetime import datetime, timedelta
-from dashboard.services.machine_stats import MachineStats
-from dashboard.services.docker_health import ContainerHealth
+from dashboard.services.machine_stats import MachineStats, disk_usage_snapshot, DiskStat
+from dashboard.services.docker_health import ContainerHealth, get_container_health
+from dashboard.services.get_weather import wind_ms_to_beaufort, get_direction_letter_from_wind_dir, get_icon_from_code
 from django.shortcuts import render
 from django.views import View
 from django.utils import timezone
+from django.db.models import Prefetch
+from dashboard.services.util import convert_unix_dt_to_datetime, local_date, bytes_to_size_notation
+from dashboard.models.weather import DayForecast, Location, WeatherDetail
+from dashboard.models.application import MinuteSystemSample
 
 
 @dataclass
@@ -15,31 +20,51 @@ class DashboardAlert:
 
 
 @dataclass
-class DashboardHeader:
+class DashboardHeaderView:
     hostname: str
     generated_at: datetime
     alerts: List[DashboardAlert]
 
-
 @dataclass
-class WeatherDay:
-    label: str
-    tmax: float
-    tmin: float
-    summary: str
-    wind_bft: float
-    rain_chance_percent: int
+class WeatherDetailView:
     icon: str
-
+    main: str
+    description: str
 
 @dataclass
-class DashboardWeather:
-    days: List[WeatherDay]
+class WeatherDayView:
+    label: str # "Wednesday" or "Today"
+    # temps
+    temp_day: str
+    temp_min: str
+    temp_max: str
+    temp_night: str
+    temp_eve: str
+    temp_morn: str
+
+    # feels_like
+    feels_day: str
+    feels_night: str
+    feels_eve: str
+    feels_morn: str
+    wind_speed_bft: str
+    wind_dir_letters: str
+    wind_gust_bft: str | None
+
+    # Other
+    cloud_pct: str
+    uvi: str
+    percipitation_probability_pct: str
+    detail: WeatherDetailView
+
+@dataclass
+class DashboardWeatherView:
+    days: List[WeatherDayView]
     updated_at: datetime
 
 
 @dataclass
-class DashboardMetric:
+class DashboardMetricView:
     start_time: datetime
     end_time: datetime
     machinestats: MachineStats
@@ -47,240 +72,239 @@ class DashboardMetric:
 
 
 @dataclass
-class DiskStat:
+class DiskStatView:
     id: str
     disk_name: str
     disk_used_percent: float
     disk_unused_percent: float
-    used: int
-    total: int
+    used: str
+    total: str
 
 
 @dataclass
-class DashboardDisks:
+class DashboardDisksView:
     updated_at: datetime
-    disks: List[DiskStat]
+    disks: List[DiskStatView]
 
 
 @dataclass
-class GraphStat:
+class GraphStatView:
     id: str
     color: str
     labels: List[int]
-    values: List[float]
+    values: List[float | None]
 
 
 @dataclass
-class DashboardStat:
+class DashboardStatView:
     updated_at: datetime
     stat_id_and_grid: str
     stat_icon_path: str
     stat_title: str
-    graph_data: List[GraphStat]
+    graph_data: List[GraphStatView]
 
 
 @dataclass
-class DashboardDockerHealth:
+class DashboardDockerHealthView:
     updated_at: datetime
-    total_memory_used: int
+    total_memory_used: str
     containers: List[ContainerHealth]
 
 
 @dataclass
-class DashboardStats:
-    memory: DashboardStat
-    cpu: DashboardStat
-    network: DashboardStat
+class DashboardStatsView:
+    memory: DashboardStatView
+    cpu: DashboardStatView
+    network: DashboardStatView
 
 
 @dataclass
-class DashboardData:
-    header: DashboardHeader
-    weather: DashboardWeather
-    disks: DashboardDisks
-    stats: DashboardStats
-    docker: DashboardDockerHealth
-
-
-now = timezone.now()
-
-dashboard_data = DashboardData(
-    header=DashboardHeader(
-        hostname="raspi-01",
-        generated_at=now,
-        alerts=[
-            DashboardAlert(level="info", message="System booted cleanly."),
-            DashboardAlert(level="warning", message="Disk usage above 80%."),
-        ],
-    ),
-    weather=DashboardWeather(
-        updated_at=now,
-        days=[
-            WeatherDay(
-                label="Monday",
-                tmax=23.5,
-                tmin=15.2,
-                summary="Sunny with light clouds",
-                wind_bft=3,
-                rain_chance_percent=10,
-                icon="clear-day.svg",
-            ),
-            WeatherDay(
-                label="Tuesday",
-                tmax=19.1,
-                tmin=12.0,
-                summary="Light rain showers",
-                wind_bft=4,
-                rain_chance_percent=60,
-                icon="rain.svg",
-            ),
-            WeatherDay(
-                label="Wednesday",
-                tmax=19.1,
-                tmin=12.0,
-                summary="Light rain showers",
-                wind_bft=4,
-                rain_chance_percent=60,
-                icon="rainbow.svg",
-            ),
-            WeatherDay(
-                label="Thursday",
-                tmax=19.1,
-                tmin=12.0,
-                summary="Light rain showers",
-                wind_bft=4,
-                rain_chance_percent=60,
-                icon="hail.svg",
-            ),
-        ],
-    ),
-    disks=DashboardDisks(
-        updated_at=now,
-        disks=[
-            DiskStat(
-                id="sda",
-                disk_name="/dev/sda1",
-                disk_used_percent=78.2,
-                disk_unused_percent=21.8,
-                used=10,
-                total=100,
-            ),
-            DiskStat(
-                id="sdb",
-                disk_name="/dev/sdb1",
-                disk_used_percent=45.0,
-                disk_unused_percent=55.0,
-                used=10,
-                total=100,
-            ),
-        ],
-    ),
-    stats=DashboardStats(
-        memory=DashboardStat(
-            updated_at=now,
-            stat_id_and_grid="memory",
-            stat_icon_path="svg/tabler/device-sd-card.svg",
-            stat_title="Memory Usage",
-            graph_data=[
-                GraphStat(
-                    id="mem",
-                    color="blue",
-                    labels=list(range(10)),
-                    values=[40 + i * 0.5 for i in range(10)],  # fake %
-                )
-            ],
-        ),
-        cpu=DashboardStat(
-            updated_at=now,
-            stat_id_and_grid="cpu",
-            stat_icon_path="svg/tabler/cpu.svg",
-            stat_title="CPU Usage",
-            graph_data=[
-                GraphStat(
-                    id="cpu",
-                    color="green",
-                    labels=list(range(10)),
-                    values=[10 + i * 2 for i in range(10)],  # fake %
-                )
-            ],
-        ),
-        network=DashboardStat(
-            updated_at=now,
-            stat_id_and_grid="network",
-            stat_icon_path="svg/tabler/arrows-left-right.svg",
-            stat_title="Network Traffic",
-            graph_data=[
-                GraphStat(
-                    id="net-up",
-                    color="orange",
-                    labels=list(range(10)),
-                    values=[i * 5 for i in range(10)],  # fake kbps
-                ),
-                GraphStat(
-                    id="net-down",
-                    color="purple",
-                    labels=list(range(10)),
-                    values=[50 - i * 3 for i in range(10)],  # fake kbps
-                ),
-            ],
-        ),
-    ),
-    docker=DashboardDockerHealth(
-        updated_at=now,
-        total_memory_used=512 * 1024 * 1024,  # 512 MB
-        containers=[
-            ContainerHealth(
-                id="abc123",
-                name="nginx",
-                status="running",
-                health="healthy",
-                mem_usage=10,
-            ),
-            ContainerHealth(
-                id="def456",
-                name="redis",
-                status="running",
-                health="unhealthy",
-                mem_usage=10,
-            ),
-            ContainerHealth(
-                id="ghi789", name="worker", status="exited", health="none", mem_usage=10
-            ),
-        ],
-    ),
-)
-
+class DashboardViewData:
+    header: DashboardHeaderView
+    weather: DashboardWeatherView
+    disks: DashboardDisksView
+    stats: DashboardStatsView
+    docker: DashboardDockerHealthView
 
 class DashboardView(View):
-    def get(self, request):
-        now = timezone.now()
-        # Get alerts; for now empty list
-        header = DashboardHeader(
-            hostname="Raspberrypi",
+
+    def get_header(self,now: datetime) -> DashboardHeaderView:
+        return DashboardHeaderView(
+            hostname="Raspberry pi", # TODO: Change
+            alerts=[],
             generated_at=now,
-            alerts=[]
         )
-        weather=DashboardWeather(
+
+
+    def get_weather(self, now: datetime) -> DashboardWeatherView:
+        dates = [local_date(now + timedelta(days=i)) for i in range(6)]
+        location = Location.objects.get(name="Blankenberge")
+        qs = (
+            DayForecast.objects
+            .filter(location=location, date__in=set(dates))  # set() dedupes
+            .order_by("date")                                # or "date","generated_at"
+            .prefetch_related(
+                Prefetch("weather_details", queryset=WeatherDetail.objects.all().order_by("id"))
+            )
+        )
+
+        def make_view(forecast: DayForecast) -> WeatherDayView:
+            detail: WeatherDetail = forecast.weather_details.all()[0] # type: ignore
+            return WeatherDayView(
+                label=forecast.date.strftime("%A"),
+                temp_day=f"{forecast.temp_day:.1f}",
+                temp_min=f"{forecast.temp_min:.1f}",
+                temp_max=f"{forecast.temp_max:.1f}",
+                temp_night=f"{forecast.temp_night:.1f}",
+                temp_eve=f"{forecast.temp_eve:.1f}",
+                temp_morn=f"{forecast.temp_morn:.1f}",
+
+                # feels_like
+                feels_day=f"{forecast.feels_day:.1f}",
+                feels_night=f"{forecast.feels_night:.1f}",
+                feels_eve=f"{forecast.feels_eve:.1f}",
+                feels_morn=f"{forecast.feels_morn:.1f}",
+                wind_speed_bft=str(wind_ms_to_beaufort(forecast.wind_speed)[0]),
+                wind_dir_letters=get_direction_letter_from_wind_dir(forecast.wind_deg),
+                wind_gust_bft=str(wind_ms_to_beaufort(forecast.wind_gust)[0] if forecast.wind_gust is not None else None),
+
+                # Other
+                cloud_pct=str(forecast.clouds),
+                uvi=str(forecast.uvi),
+                percipitation_probability_pct=str(int(forecast.precipitation_probability * 100.0)),
+                detail=WeatherDetailView(
+                    main=detail.main_type,
+                    description=detail.description,
+                    icon=get_icon_from_code(detail.weather_id) if detail.weather_id else ""
+                )
+            )
+        
+        days: List[WeatherDayView] = [ make_view(forecast) for forecast in qs]
+        return DashboardWeatherView(
             updated_at=now,
-            days=[
-                WeatherDay(
-                    label="Monday",
-                    tmax=23.5,
-                    tmin=15.2,
-                    summary="Sunny with light clouds",
-                    wind_bft=3,
-                    rain_chance_percent=10,
-                    icon="clear-day.svg",
-                ),
-                WeatherDay(
-                    label="Tuesday",
-                    tmax=19.1,
-                    tmin=12.0,
-                    summary="Light rain showers",
-                    wind_bft=4,
-                    rain_chance_percent=60,
-                    icon="rain.svg",
-                ),
-            ],
-        ),
-        return render(request, "dashboard/dashboard.html", context=asdict(dashboard_data))
+            days=days,
+        )
+    
+    def get_disks(self, now: datetime) -> DashboardDisksView:
+        disk_info = disk_usage_snapshot()
+
+        def make_view(snap:DiskStat) -> DiskStatView:
+            used_frac = snap.used / snap.total
+            unused_frac = 1.0 - used_frac
+            return DiskStatView(
+                id=snap.device,
+                disk_name="",
+                disk_used_percent=used_frac * 100.0,
+                disk_unused_percent=unused_frac * 100.0,
+                used=bytes_to_size_notation(snap.used),
+                total=bytes_to_size_notation(snap.total),
+            )
+        return DashboardDisksView(
+            updated_at=now,
+            disks=[make_view(snap) for snap in disk_info]
+        )
+
+    def get_stats(self, now: datetime) -> DashboardStatsView:
+        one_hour_ago = now - timedelta(hours=1)
+        qs = MinuteSystemSample.objects.filter(
+            minute__gte=one_hour_ago,
+            minute__lte=now
+        ).order_by("minute")
+
+        result = DashboardStatsView(
+            memory = DashboardStatView(
+                updated_at=now,
+                stat_id_and_grid="memory",
+                stat_icon_path="device-sd-card.svg",
+                stat_title="Memory usage and swap (MB)",
+                graph_data=[
+                    GraphStatView(
+                        id="memory-ram-graph",
+                        labels = [],
+                        values = [],
+                        color="blue"
+                    ),
+                    GraphStatView(
+                        id="memory-swap-graph",
+                        labels = [],
+                        values = [],
+                        color="red"
+                    )
+                ],
+            ),
+            cpu = DashboardStatView(
+                updated_at=now,
+                stat_id_and_grid="cpu",
+                stat_icon_path="cpu.svg",
+                stat_title="CPU usage (% of total)",
+                graph_data=[GraphStatView(
+                    id="cpu-graph",
+                    labels = [],
+                    values = [],
+                    color="green"
+                )],
+            ),
+            network=DashboardStatView(
+                updated_at=now,
+                stat_id_and_grid="network",
+                stat_icon_path="network.svg",
+                stat_title="Network download and upload (Mbps)",
+                graph_data=[
+                    GraphStatView(
+                        id="network--down-graph",
+                        labels = [],
+                        values = [],
+                        color="purple"
+                    ),
+                    GraphStatView(
+                        id="memory-up-graph",
+                        labels = [],
+                        values = [],
+                        color="yellow"
+                    ),
+                ],
+            ),
+        )
+
+        def minutes_diff(ts) -> int:
+            delta = ts - now
+            return int(delta.total_seconds() // 60)
+        # TODO optimise? A lot of list allocaton. Decimate?
+        for sample in qs:
+            diff_label = minutes_diff(sample.minute)
+            result.memory.graph_data[0].labels.append(diff_label)
+            result.memory.graph_data[1].labels.append(diff_label)
+            result.memory.graph_data[0].values.append(float(sample.mem_used_avg))
+            result.memory.graph_data[1].values.append(float(sample.swap_used_avg) if sample.swap_used_avg else None)
+
+            result.cpu.graph_data[0].labels.append(diff_label)
+            result.cpu.graph_data[0].values.append(sample.cpu_percent_avg)
+
+            result.network.graph_data[0].labels.append(diff_label)
+            result.network.graph_data[1].labels.append(diff_label)
+            result.network.graph_data[0].values.append(float(sample.rx_bps_avg / 1000000) if sample.rx_bps_avg else None)
+            result.network.graph_data[1].values.append(float(sample.tx_bps_avg / 1000000) if sample.tx_bps_avg else None)
+
+        return result
+    
+    def get_docker(self, now)-> DashboardDockerHealthView:
+        containers = get_container_health()
+        total_memory_used = sum(container.mem_usage for container in containers)
+
+        return DashboardDockerHealthView(
+            updated_at=now,
+            total_memory_used=bytes_to_size_notation(total_memory_used),
+            containers=containers, # Value from service already view suitable
+        )
+    
+    def get(self, request):
+        now_minute = timezone.now().replace(second=0, microsecond=0)
+        # Get alerts; for now empty list
+        view_data = DashboardViewData(
+            header = self.get_header(now_minute),
+            stats=self.get_stats(now_minute),
+            docker=self.get_docker(now_minute),
+            weather=self.get_weather(now_minute),
+            disks=self.get_disks(now_minute)
+        )
+        return render(request, "dashboard/dashboard.html", context=asdict(view_data))

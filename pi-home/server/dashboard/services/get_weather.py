@@ -163,81 +163,82 @@ def get_weather(location: Tuple[str,str]):
     api_key = OPENWEATHERMAP_KEY
     return fetch_weather(lat,lon,api_key)
 
-OWM_DESCRIPTION_TO_ICON = {
+OWM_CODE_TO_ICON = {
     # Thunderstorm (2xx)
-    "thunderstorm with light rain": "thunderstorms-rain.svg",
-    "thunderstorm with rain": "thunderstorms-rain.svg",
-    "thunderstorm with heavy rain": "thunderstorms-extreme-rain.svg",
-    "light thunderstorm": "thunderstorms.svg",
-    "thunderstorm": "thunderstorms.svg",
-    "heavy thunderstorm": "thunderstorms-extreme.svg",
-    "ragged thunderstorm": "thunderstorms.svg",
-    "thunderstorm with light drizzle": "thunderstorms-rain.svg",
-    "thunderstorm with drizzle": "thunderstorms-rain.svg",
-    "thunderstorm with heavy drizzle": "thunderstorms-extreme-rain.svg",
+    200: "thunderstorms-rain.svg",
+    201: "thunderstorms-rain.svg",
+    202: "thunderstorms-extreme-rain.svg",
+    210: "thunderstorms.svg",
+    211: "thunderstorms.svg",
+    212: "thunderstorms-extreme.svg",
+    221: "thunderstorms.svg",
+    230: "thunderstorms-rain.svg",
+    231: "thunderstorms-rain.svg",
+    232: "thunderstorms-extreme-rain.svg",
 
     # Drizzle (3xx)
-    "light intensity drizzle": "drizzle.svg",
-    "drizzle": "drizzle.svg",
-    "heavy intensity drizzle": "drizzle.svg",
-    "light intensity drizzle rain": "drizzle.svg",
-    "drizzle rain": "drizzle.svg",
-    "heavy intensity drizzle rain": "drizzle.svg",
-    "shower rain and drizzle": "drizzle.svg",
-    "heavy shower rain and drizzle": "drizzle.svg",
-    "shower drizzle": "drizzle.svg",
+    300: "drizzle.svg",
+    301: "drizzle.svg",
+    302: "drizzle.svg",
+    310: "drizzle.svg",
+    311: "drizzle.svg",
+    312: "drizzle.svg",
+    313: "drizzle.svg",
+    314: "drizzle.svg",
+    321: "drizzle.svg",
 
     # Rain (5xx)
-    "light rain": "rain.svg",
-    "moderate rain": "rain.svg",
-    "heavy intensity rain": "extreme-rain.svg",
-    "very heavy rain": "extreme-rain.svg",
-    "extreme rain": "extreme-rain.svg",
-    "freezing rain": "sleet.svg",
-    "light intensity shower rain": "rain.svg",
-    "shower rain": "rain.svg",
-    "heavy intensity shower rain": "extreme-rain.svg",
-    "ragged shower rain": "rain.svg",
+    500: "partly-cloudy-day-rain.svg",
+    501: "partly-cloudy-day-rain.svg",
+    502: "rain.svg",
+    503: "rain.svg",
+    504: "extreme-rain.svg",
+    511: "sleet.svg",              # freezing rain
+    520: "rain.svg",
+    521: "rain.svg",
+    522: "extreme-rain.svg",
+    531: "rain.svg",
 
     # Snow (6xx)
-    "light snow": "snow.svg",
-    "snow": "snow.svg",
-    "heavy snow": "extreme-snow.svg",
-    "sleet": "sleet.svg",
-    "light shower sleet": "sleet.svg",
-    "shower sleet": "sleet.svg",
-    "light rain and snow": "sleet.svg",
-    "rain and snow": "sleet.svg",
-    "light shower snow": "snow.svg",
-    "shower snow": "snow.svg",
-    "heavy shower snow": "extreme-snow.svg",
+    600: "snow.svg",
+    601: "snow.svg",
+    602: "extreme-snow.svg",
+    611: "sleet.svg",
+    612: "sleet.svg",
+    613: "sleet.svg",
+    615: "sleet.svg",
+    616: "sleet.svg",
+    620: "snow.svg",
+    621: "snow.svg",
+    622: "extreme-snow.svg",
 
     # Atmosphere (7xx)
-    "mist": "mist.svg",
-    "smoke": "smoke.svg",
-    "haze": "haze.svg",
-    "sand/dust whirls": "dust.svg",
-    "fog": "fog.svg",
-    "sand": "dust.svg",
-    "dust": "dust.svg",
-    "volcanic ash": "extreme.svg",
-    "squalls": "wind.svg",
-    "tornado": "tornado.svg",
+    701: "mist.svg",
+    711: "smoke.svg",
+    721: "haze.svg",
+    731: "dust.svg",               # sand/dust whirls
+    741: "fog.svg",
+    751: "dust.svg",               # sand
+    761: "dust.svg",               # dust
+    762: "extreme.svg",            # volcanic ash (generic extreme icon)
+    771: "wind.svg",               # squalls
+    781: "tornado.svg",
 
     # Clear (800)
-    "clear sky": "clear-day.svg",
+    800: "clear-day.svg",
 
     # Clouds (80x)
-    "few clouds: 11-25%": "partly-cloudy-day.svg",
-    "scattered clouds: 25-50%": "partly-cloudy-day.svg",
-    "broken clouds: 51-84%": "overcast-day.svg",
-    "overcast clouds: 85-100%": "overcast.svg",
+    801: "partly-cloudy-day.svg",
+    802: "partly-cloudy-day.svg",
+    803: "overcast-day.svg",
+    804: "overcast.svg",
 }
 
-def get_icon_from_description(description:str) -> str:
-    result = OWM_DESCRIPTION_TO_ICON.get(description, None)
+
+def get_icon_from_code(code:int) -> str:
+    result = OWM_CODE_TO_ICON.get(code, None)
     if not result:
-        raise Exception(f"Corresponding icon not found for open weather description '{description}'")
+        raise Exception(f"Corresponding icon not mapped for open weather code '{code}'")
     return result
 
 dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]

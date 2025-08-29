@@ -8,6 +8,7 @@
     --blue: #0000ff;
     /* accent */
     --yellow: #ffff00;
+    --orange: orange;
     --black: #000000;
     --white: #ffffff;
     --dark-grey: #555555;
@@ -42,7 +43,7 @@
     /* still black-ish for e-ink */
     --border: #111;
     --border-medium: #222;
-    --border-light: var(--bg)
+    --border-light: var(--grey)
 }
 
 /* Typography */
@@ -245,56 +246,123 @@ body {
 .weather-cards {
     display: flex;
     flex-wrap: nowrap;
-    gap: 8px;
     overflow: hidden;
-    /* clip extra cards */
+    justify-content: space-around;
 }
 
-/* 5 cards × 220px + 4 gaps × 8px = 1132px (fits inside 1200) */
+.weather-cards > .weather-card {
+    padding-right: 12px;
+    margin-right: 12px;
+    border-right: 2px dashed var(--border-light);
+}
+
+.weather-cards > .weather-card:last-child {
+    padding-right: 0px;
+    margin-right: 0px;
+    border-right: 0px;
+}
+
 .weather-card {
-    flex: 0 0 220px;
-    /* fixed width, no grow, no shrink */
+    flex: 1 1 128px;
     background: var(--bg-card, #f2f2f2);
-    border-radius: 6px;
-    padding: 6px;
     box-sizing: border-box;
+}
+
+
+
+.weather-card p {
+    padding: 0;
+    margin: 0;
+    line-height: 1.1;
 }
 
 .wc-title {
     font-weight: 700;
     margin-bottom: 4px;
+    text-align: center;
+}
+.wc-summary {
+    margin-bottom: 4px;
+    text-align: center;
+
 }
 
-.wc-temp {
-    display: flex;
-    gap: 8px;
-    align-items: baseline;
-    font-size: 1.1rem;
-    margin-bottom: 2px;
-}
-
-.wc-tmax {
-    color: var(--accent, #1565c0);
-    font-weight: 700;
-}
-
-.wc-tmin {
-    opacity: 0.8;
-}
-
-.wc-desc {
-    margin: 2px 0 4px 0;
-}
-
-.wc-meta {
-    font-size: 0.95rem;
-    display: flex;
-    gap: 8px;
+.wc-card-container {
+    display: grid;
+    grid-template-areas: 
+        "wc-icon wc-icon wc-icon wc-icon wc-icon wc-wind"
+        "wc-icon wc-icon wc-icon wc-icon wc-icon wc-rain"
+        "wc-temp wc-temp wc-temp wc-feel wc-feel wc-feel";
 }
 
 .wc-icon {
-    margin-top: 4px;
+    grid-area: wc-icon;
 }
+.wc.wind {
+    grid-area: wc-wind;
+}
+.wc-rain {
+    grid-area: wc-rain;
+    font-size: small;
+}
+.wc-temp {
+    grid-area: wc-temp;
+}
+
+.wc-feel {
+    grid-area: wc-feel;
+    margin-left:8px;
+}
+
+.wc-extra {
+    grid-area: wc-extra;
+}
+
+.wc-avg-min-max {
+    display:flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: space-between;
+}
+
+.wc-avg-min-max .avg {
+    font-size: x-large;
+    color: var(--black);
+    font-weight: bold;
+}
+
+.wc-avg-min-max  .min  {
+    font-size: small;
+    color: var(--blue);
+}
+
+.wc-avg-min-max  .max  {
+    font-size: small;
+    color: var(--red);
+}
+
+.wc-wind-dir {
+    font-size: x-large;
+    font-weight: bold;
+    color: var(--orange);
+}
+
+.wc-wind-bft {
+    font-size: x-large;
+    font-weight: bold;
+}
+
+.wc-feels-like {
+    color: var(--dark-grey);
+    font-size:smaller;
+}
+
+.wc-feels-avg {
+    font-weight: bold;
+    color: var(--dark-grey);
+}
+
+
 
 /* Optional: ensure any weather SVG/IMG icons stay within card bounds */
 .weather-card img,
@@ -327,7 +395,7 @@ body {
 .disk-list>div {
     padding-right: 12px;
     margin-right: 12px;
-    border-right: 2px solid var(--border);
+    border-right: 2px dashed var(--border-light);
 }
 
 .disk-list>div:last-child {
@@ -482,9 +550,14 @@ body {
     vertical-align: middle;
 }
 
-.icon.small {
+.icon.icon.small {
     width: 24px;
     height: 24px;
+}
+
+.icon.icon-xsmall {
+    width: 16px;
+    height: 16px;
 }
 
 
@@ -497,8 +570,6 @@ body {
 }
 
 .weather-icon {
-    width: 128px;
-    height: 128px;
     display: inline-block;
     vertical-align: middle;
 }
@@ -508,6 +579,7 @@ body {
 .icon-blue { color: var(--blue) }
 .icon-yellow { color: var(--yellow-dark-50) }
 .icon-grey { color: var(--grey) }
+.icon-orange { color: var(--orange) }
 
 /* Print-like clarity for e-ink export */
 @media print {

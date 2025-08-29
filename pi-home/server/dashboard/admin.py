@@ -2,6 +2,7 @@ from django.contrib import admin
 from dashboard.models.photos import SourceImage, Variant
 from dashboard.models.job import Job, Execution, JobLogEntry
 from dashboard.models.weather import Location, WeatherDetail, DayForecast
+from dashboard.models.application import MinuteSystemSample
 
 @admin.register(SourceImage)
 class SourceImageAdmin(admin.ModelAdmin):
@@ -61,3 +62,7 @@ class DayForecastAdmin(admin.ModelAdmin):
 @admin.register(WeatherDetail)
 class WeatherDetailAdmin(admin.ModelAdmin):
     list_display = [f.name for f in WeatherDetail._meta.fields]
+
+@admin.register(MinuteSystemSample)
+class MinsystemSampleAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in MinuteSystemSample._meta.fields]

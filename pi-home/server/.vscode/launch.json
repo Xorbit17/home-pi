@@ -6,11 +6,11 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",
-      "args": [
-        "job",
-        "WEATHER"
-      ],
-      // "args": ["job_tick"],
+      // "args": [
+      //   "job",
+      //   "WEATHER"
+      // ],
+      "args": ["runserver"],
       "django": true,
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"

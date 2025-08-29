@@ -33,6 +33,24 @@
         Chart.defaults.color = '#000';
         Chart.defaults.plugins.legend.display = false;
         Chart.defaults.scale.grid.color = '#dddddd'
+
+        const mapIdToYOptions = {
+            "memory": {
+                ticks: {
+                    callback: function (value,index, ticks) {
+                        return (value ?? 0 / 1000000).toFixed()
+                    }
+                }
+            },
+            "cpu": {
+                ticks: {
+                    callback: function (value,index, ticks) {
+                        return (value).toFixed() + "%"
+                    }
+                }
+            },
+            "network": undefined,
+        }
         const options = { 
             animation: false,
             devicePixelRatio: 1,
@@ -68,6 +86,7 @@
         for (const stats of Object.values(systemStats)) {
             for (const graphData of stats.graph_data) {
                 const graphId = `stat-graph-canvas-${ stats.stat_id_and_grid }-${graphData.id}`
+
                 const data = {
                     labels: graphData.labels,
                     datasets: [{
@@ -75,16 +94,20 @@
                         borderColor: graphData.color
                     }]
                 };
+                const specificOptions = {
+                    ...options, 
+                    responsive: true,
+                    pointStyle: false,
+                    scales: {
+                        y: mapIdToYOptions[stats.stat_id_and_grid],
+                    },
+                };
                 new Chart(
                     document.getElementById(graphId),
                     {
                         type: 'line',
                         data,
-                        options: {
-                            ...options, 
-                            responsive: true,
-                            pointStyle: false,
-                        },
+                        options: specificOptions,
                     },
                 );
             }
