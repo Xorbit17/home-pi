@@ -56,9 +56,6 @@ def get_art_generator_prompt(context: dict) -> str:
     return ART_GENERATOR_PROMPT_TEMPLATE.render(Context(context))
 
 def get_art_instructions_prompt(markdown, *, context: ImageProcessingContext):
-    """
-    Tries to load markdown file for art instructions. If not fall back to the description in the choices
-    """
     base_dir = Path(__file__).resolve().parent
     md_path = base_dir / "context-templates" / "artstyles" / markdown
     if (md_path.exists()):
@@ -67,9 +64,6 @@ def get_art_instructions_prompt(markdown, *, context: ImageProcessingContext):
     return art_style_readable
 
 def get_content_type_instructions(*, context: ImageProcessingContext):
-    """
-    Tries to load markdown file for content instructions. If not fall back to the description in the choices
-    """
     markdown = CONTENT_TYPE_MARKDOWN.get(context.classification.contentType)
     if not markdown:
         raise RuntimeError()
@@ -174,11 +168,6 @@ def build_palette_list(
     key_priority: Optional[Sequence[str]] = None,
     max_colors: Optional[int] = None,
 ) -> List[RGB]:
-    """
-    Flatten your palette dict into a unique, ordered list of (R,G,B).
-    - key_priority: iterate these keys first (preserves your 'native' colors up front)
-    - max_colors: optional cap (e.g., 256 for Pillow palettes)
-    """
     seen = set()
     out: List[RGB] = []
 

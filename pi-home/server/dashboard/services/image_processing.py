@@ -3,12 +3,10 @@ from PIL import Image
 import base64
 import io
 
-# If pillow-heif is installed, register its opener so PIL can read .heic/.heif
 try:
     from pillow_heif import register_heif_opener  # type: ignore
     register_heif_opener()
 except Exception:
-    # If not installed, HEIC opening will fail naturally when attempted.
     pass
 
 
@@ -37,14 +35,12 @@ def file_to_base64(path: Path | str) -> str:
         img.save(
             buf,
             format="JPEG",
-            quality=95,      # 95 is a good sweet spot; raise to 97-100 if desired
-            subsampling=0,   # 4:4:4 for better chroma quality
-            optimize=True,   # better entropy coding
-            progressive=True # progressive JPEG
+            quality=95,
+            subsampling=0,
+            optimize=True,
         )
         return base64.b64encode(buf.getvalue()).decode("utf-8")
 
-    # Fallback: load via PIL and return as PNG base64
     img = Image.open(p)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
@@ -61,4 +57,3 @@ def pil_to_base64(image: Image.Image, format: str = "PNG", **save_kwargs) -> str
 
 def base64_to_pil(b64: str) -> Image.Image:
     return Image.open(io.BytesIO(base64.b64decode(b64))).convert("RGBA")
-

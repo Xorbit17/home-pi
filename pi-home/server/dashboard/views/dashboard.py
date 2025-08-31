@@ -50,6 +50,7 @@ class WeatherDayView:
     wind_speed_bft: str
     wind_dir_letters: str
     wind_gust_bft: str | None
+    wind_descr: str
 
     # Other
     cloud_pct: str
@@ -120,11 +121,11 @@ class DashboardStatsView:
 
 @dataclass
 class DashboardViewData:
-    header: DashboardHeaderView
-    weather: DashboardWeatherView
-    disks: DashboardDisksView
-    stats: DashboardStatsView
-    docker: DashboardDockerHealthView
+    header: DashboardHeaderView | None # None is not rendered
+    weather: DashboardWeatherView | None
+    disks: DashboardDisksView | None 
+    stats: DashboardStatsView | None
+    docker: DashboardDockerHealthView | None
 
 class DashboardView(View):
 
@@ -167,6 +168,7 @@ class DashboardView(View):
                 wind_speed_bft=str(wind_ms_to_beaufort(forecast.wind_speed)[0]),
                 wind_dir_letters=get_direction_letter_from_wind_dir(forecast.wind_deg),
                 wind_gust_bft=str(wind_ms_to_beaufort(forecast.wind_gust)[0] if forecast.wind_gust is not None else None),
+                wind_descr=wind_ms_to_beaufort(forecast.wind_speed)[1],
 
                 # Other
                 cloud_pct=str(forecast.clouds),
@@ -174,7 +176,7 @@ class DashboardView(View):
                 percipitation_probability_pct=str(int(forecast.precipitation_probability * 100.0)),
                 detail=WeatherDetailView(
                     main=detail.main_type,
-                    description=detail.description,
+                    description=detail.description.capitalize(),
                     icon=get_icon_from_code(detail.weather_id) if detail.weather_id else ""
                 )
             )
@@ -192,8 +194,8 @@ class DashboardView(View):
             used_frac = snap.used / snap.total
             unused_frac = 1.0 - used_frac
             return DiskStatView(
-                id=snap.device,
-                disk_name="",
+                id=snap.device.replace("/","-"),
+                disk_name=snap.device.replace("/dev/",""),
                 disk_used_percent=used_frac * 100.0,
                 disk_unused_percent=unused_frac * 100.0,
                 used=bytes_to_size_notation(snap.used),
@@ -216,7 +218,7 @@ class DashboardView(View):
                 updated_at=now,
                 stat_id_and_grid="memory",
                 stat_icon_path="device-sd-card.svg",
-                stat_title="Memory usage and swap (MB)",
+                stat_title="Memory usage and swap (GB)",
                 graph_data=[
                     GraphStatView(
                         id="memory-ram-graph",
@@ -303,7 +305,8 @@ class DashboardView(View):
         view_data = DashboardViewData(
             header = self.get_header(now_minute),
             stats=self.get_stats(now_minute),
-            docker=self.get_docker(now_minute),
+            # docker=self.get_docker(now_minute),
+            docker=None,
             weather=self.get_weather(now_minute),
             disks=self.get_disks(now_minute)
         )

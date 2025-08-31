@@ -16,104 +16,18 @@
 <body>
     <div class="dashboard-container">
         <main class="grid">
-            {% include "dashboard/partials/header.html" with header=header alerts=alerts %}
-            {% include "dashboard/partials/weather.html" with weather=weather %}
-            {% include "dashboard/partials/disks.html" with disks=disks %}
-            {% include "dashboard/partials/stat_graph.html" with stats=stats.memory %}
-            {% include "dashboard/partials/stat_graph.html" with stats=stats.cpu %}
-            {% include "dashboard/partials/stat_graph.html" with stats=stats.network %}
+            {% if header %}{% include "dashboard/partials/header.html" with header=header alerts=alerts %}{% endif %}
+            {% if weather %}{% include "dashboard/partials/weather.html" with weather=weather %}{% endif %}
+            {% if disks %}{% include "dashboard/partials/disks.html" with disks=disks %}{% endif %}
+            {% if stats.memory %}{% include "dashboard/partials/stat_graph.html" with stats=stats.memory %}{% endif %}
+            {% if stats.cpu %}{% include "dashboard/partials/stat_graph.html" with stats=stats.cpu %}{% endif %}
+            {% if stats.network %}{% include "dashboard/partials/stat_graph.html" with stats=stats.network %}{% endif %}
             {% comment %} {% include "dashboard/partials/transmission.html" %} {% endcomment %}
-            {% include "dashboard/partials/docker.html" with docker=docker%}
+            {% if docker %}{% include "dashboard/partials/docker.html" with docker=docker%}{% endif %}
             {% comment %} {% include "dashboard/partials/calendar.html" with calendar=calendar%} {% endcomment %}
         </main>
     </div>
-    <script>
-        Chart.defaults.backgroundColor = '#FFFFFF';
-        Chart.defaults.borderColor = '#36A2EB';
-        Chart.defaults.color = '#000';
-        Chart.defaults.plugins.legend.display = false;
-        Chart.defaults.scale.grid.color = '#dddddd'
-
-        const mapIdToYOptions = {
-            "memory": {
-                ticks: {
-                    callback: function (value,index, ticks) {
-                        return (value ?? 0 / 1000000).toFixed()
-                    }
-                }
-            },
-            "cpu": {
-                ticks: {
-                    callback: function (value,index, ticks) {
-                        return (value).toFixed() + "%"
-                    }
-                }
-            },
-            "network": undefined,
-        }
-        const options = { 
-            animation: false,
-            devicePixelRatio: 1,
-        };
-
-        // Disks
-        const disks = JSON.parse(document.getElementById("disks-graph-data").textContent);
-        const systemStats = {
-            mem: JSON.parse(document.getElementById("memory-graph-data").textContent),
-            cpu: JSON.parse(document.getElementById("cpu-graph-data").textContent),
-            network: JSON.parse(document.getElementById("network-graph-data").textContent),
-        }
-        const diskBackgroundColor = ['#00ff00','#80ff80'];
-        for (const d of disks.disks) {
-            const data = {
-                datasets: [
-                    {
-                        data: [d.disk_used_percent, d.disk_unused_percent],
-                        backgroundColor: diskBackgroundColor,
-                    },
-                ],
-            };
-            new Chart(
-                document.getElementById(`disk-canvas-${d.id}`),
-                {
-                    type: 'doughnut',
-                    data,
-                    options: {...options, responsive: false},
-                },
-            );
-        }
-        // Usage graphs
-        for (const stats of Object.values(systemStats)) {
-            for (const graphData of stats.graph_data) {
-                const graphId = `stat-graph-canvas-${ stats.stat_id_and_grid }-${graphData.id}`
-
-                const data = {
-                    labels: graphData.labels,
-                    datasets: [{
-                        data: graphData.values,
-                        borderColor: graphData.color
-                    }]
-                };
-                const specificOptions = {
-                    ...options, 
-                    responsive: true,
-                    pointStyle: false,
-                    scales: {
-                        y: mapIdToYOptions[stats.stat_id_and_grid],
-                    },
-                };
-                new Chart(
-                    document.getElementById(graphId),
-                    {
-                        type: 'line',
-                        data,
-                        options: specificOptions,
-                    },
-                );
-            }
-
-        }
-    </script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
 </body>
 
 </html>

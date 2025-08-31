@@ -21,15 +21,32 @@ def extract_rgb_set(palette: Dict[str, Any], *, coerce_lists: bool = False) -> S
     walk(palette)
     return out
 
+NATIVE_COLORS = [
+    (0, 0, 0), # black
+    (161, 164, 165), # grey
+    (208, 190, 71), # Yellow
+    (156, 72, 75), # red
+    (61, 59, 94), # Blue
+    (58, 91, 70), # green
+    (255, 255, 255) # white
+] 
+
+NATIVE_PALETTE = {
+    "native": NATIVE_COLORS,
+}
+
+NATIVE_PALETTE_SET = extract_rgb_set(NATIVE_PALETTE)
+
+
 SHADED_PALETTE = {
-    # Your panel’s native options (unique + ordered)
     "native": [
-        (0, 0, 0),       # black
-        (255, 255, 255), # white
-        (255, 255, 0),   # yellow
-        (255, 0, 0),     # red
-        (0, 255, 0),     # green
-        (0, 0, 255),     # blue
+        (0, 0, 0), # black
+        (161, 164, 165), # grey
+        (208, 190, 71), # Yellow
+        (156, 72, 75), # red
+        (61, 59, 94), # Blue
+        (58, 91, 70), # green
+        (255, 255, 255)
     ],
 
     # Neutral greys (helpful for cleaner dithers on faces & text)
@@ -126,16 +143,3 @@ NATIVE_WITH_SKIN_PALETTE = {
 }
 
 NATIVE_WITH_SKIN_PALETTE_SET = extract_rgb_set(NATIVE_WITH_SKIN_PALETTE)
-
-NATIVE_PALETTE = {
-    "native": [
-        (0, 0, 0),       # black
-        (255, 255, 255), # white
-        (255, 255, 0),   # yellow
-        (255, 0, 0),     # red
-        (0, 255, 0),     # green
-        (0, 0, 255),     # blue
-    ],
-}
-
-NATIVE_PALETTE_SET = extract_rgb_set(NATIVE_PALETTE)

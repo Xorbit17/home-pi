@@ -12,13 +12,12 @@
             <canvas
                 class="disk-canvas"
                 id="disk-canvas-{{ d.id }}"
-                width="96"
-                height="96">
+            >
             </canvas>
             <div class="disk-info">
                 <p class="subtitle">{{ d.disk_name }}</p>
-                <p>U: {{d.used|floatformat:1}}GB/</p>
-                <p>T: {{d.total|floatformat:1}}GB</p>
+                <p><span class="disk-size-label">Used: </span>{{d.used}}</p>
+                <p><span class="disk-size-label">Total: </span>{{d.total}}</span></p>
             </div>
         </div>
         {% endfor %}
