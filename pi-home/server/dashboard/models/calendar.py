@@ -1,13 +1,16 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
+# Unused for now
 class CalendarSource(models.Model):
     name = models.CharField(max_length=120)
     ics_url = models.URLField()                           # your Google “secret iCal” URL
     timezone = models.CharField(max_length=64, default="Europe/Brussels")
     active = models.BooleanField(default=True)
-    last_modified = models.CharField(max_length=200, blank=True)
-    last_synced = models.DateTimeField(null=True, blank=True)
+    last_synced = models.DateTimeField(null=True, default=None)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self): return self.name
 
@@ -24,10 +27,11 @@ class CalendarOccurrence(models.Model):
     all_day = models.BooleanField(default=False)
 
     summary = models.CharField(max_length=500, blank=True)
-    location = models.CharField(max_length=500, blank=True)
-    description = models.TextField(blank=True)
+    location = models.CharField(max_length=500, null=True, default=None)
+    description = models.TextField(default="No description")
     canceled = models.BooleanField(default=False)               # STATUS:CANCELLED
 
+    created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

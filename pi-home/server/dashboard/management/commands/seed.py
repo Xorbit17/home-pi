@@ -5,7 +5,9 @@ from django.db import transaction
 
 from dashboard.models.job import Job 
 from dashboard.models.weather import Location
+from dashboard.models.calendar import CalendarSource
 from dashboard.constants import CRON, CLASSIFY, ART, DUMMY, WEATHER
+from dashboard.constants import LOCAL_TZ, ICAL_GOOGLE_CALENDAR_URL
 
 
 class Command(BaseCommand):
@@ -61,6 +63,14 @@ class Command(BaseCommand):
             }
         ]
 
+        seed_calendar_sources = [
+            {
+                "name": "Default calendar",
+                "ics_url": ICAL_GOOGLE_CALENDAR_URL,
+                "timezone": LOCAL_TZ,
+            }
+        ]
+
         created, updated = 0, 0
 
         for spec in seed_jobs:
@@ -97,6 +107,23 @@ class Command(BaseCommand):
             else:
                 updated += 1
                 self.stdout.write(self.style.WARNING(f"Updated Location: {obj.name}"))
+
+
+        for cal in seed_calendar_sources:
+            obj, was_created = CalendarSource.objects.update_or_create(
+                ics_url=cal["ics_url"],
+                defaults={
+                     "name": cal["name"],
+                     "timezone": cal["timezone"]
+                },
+            )
+             
+            if was_created:
+                created += 1
+                self.stdout.write(self.style.SUCCESS(f"Created CalendarSource: {obj.name}"))
+            else:
+                updated += 1
+                self.stdout.write(self.style.WARNING(f"Updated CalendarSource: {obj.name}"))
 
         
 

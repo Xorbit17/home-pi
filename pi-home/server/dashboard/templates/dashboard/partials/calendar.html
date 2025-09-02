@@ -1,45 +1,37 @@
+{% load svg %}
+{% with updated_at=calendar.updated_at today=calendar.today later=calendar.rest %}
 <section class="card calendar" aria-label="calendar">
     <header class="section-header">
-        <h2><span class="icon">{% svg "svg/tabler/calendar.svg" %}</span> Calendar</h2>
+        <h2><span class="icon">{% svg "calendar.svg" %}</span> Calendar</h2>
         <small>Updated: {{ calendar.updated_at|date:"H:i" }}</small>
     </header>
-
-    {% if calendar.today %}
     <div class="calendar-block">
         <h3>Today</h3>
-        <ul class="list">
-            {% for e in calendar.today %}
-            <li>
-                <span class="time">{{ e.start|date:"H:i" }}</span>
-                <span class="title">{{ e.title }}</span>
-                {% if e.location %}<span class="location">• {{ e.location }}</span>{% endif %}
+        {% if not today %}<div class="muted">No events</div> {% endif %}
+        <ul class="calendar-list">
+        {% for item in today %}
+            <li class="line">
+                <h4>
+                    <span class="time">{{ item.start|date:"H:i" }} - {{ item.end|date:"H:i" }}: </span>
+                    <span class="title">{{ item.title }}</span>
+                    {% if item.location %}<span class="location">{{ item.location }}</span>{% endif %}
+                </h4>
+                {% if item.description %}<div class="description">• {{ item.description }}</div>{% endif %}
             </li>
-            {% endfor %}
+        {% endfor %}
+        </ul>
+        <h3>Later</h3>
+        <ul class="calendar-list">
+        {% if not later %}<div class="muted">No events</div> {% endif %}
+        {% for item in later %}
+            <li>
+                <h4>
+                    <span class="time">{{ item.start|date:"D j/n/y H:i" }} - {{ item.end|date:"H:i" }}: </span>
+                    <span class="title">{{ item.title }}</span>
+                </h4>
+            </li>
+        {% endfor %}
         </ul>
     </div>
-    {% endif %}
-
-    {% if calendar.week %}
-    <div class="calendar-block">
-        <h3>Rest of week</h3>
-        {% for day in calendar.week %}
-        <div class="day">
-            <div class="day-label">{{ day.date|date:"D d M" }}</div>
-            {% if day.events %}
-            <ul class="list">
-                {% for e in day.events %}
-                <li>
-                    <span class="time">{{ e.start|date:"H:i" }}</span>
-                    <span class="title">{{ e.title }}</span>
-                    {% if e.location %}<span class="location">• {{ e.location }}</span>{% endif %}
-                </li>
-                {% endfor %}
-            </ul>
-            {% else %}
-            <div class="muted">No events</div>
-            {% endif %}
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
 </section>
+{% endwith %}

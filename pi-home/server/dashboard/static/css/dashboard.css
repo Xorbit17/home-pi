@@ -106,7 +106,6 @@ body {
     height: calc(var(--unit-height) * 3);
 }
 
-
 .docker {
     flex: 0 1 calc( var(--half-width) - 24px);
     height: calc(var(--unit-height) * 3);
@@ -114,7 +113,7 @@ body {
 
 .calendar {
     flex: 0 1 calc( var(--half-width) - 24px);
-    height: calc(var(--unit-height) * 3);
+    height: calc(var(--unit-height) * 6);
 }
 
 .transmission {
@@ -500,43 +499,52 @@ body {
 }
 
 .calendar h3 {
-    margin: 6px 0 4px;
-    font-size: 1rem;
+    margin: 6px 0 0px;
+    font-size:medium;
+    font-weight: bolder;
+    border-bottom: 2px solid var(--border-light);
 }
 
-.list {
+.calendar-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.list li {
-    padding: 4px 0;
-    border-bottom: 1px dotted var(--border-medium);
+.calendar-list li.line {
+    padding: 0px 8px 0px 0px;
+    border-bottom: 2px dashed var(--border-light);
 }
 
-.list .time {
+.calendar-list li.line:last-child {
+    padding: 0px 8px 8px 0px;
+    border-bottom: 0px;
+}
+
+.calendar-list h4 {
+    padding: 0px;
+    margin: 0px;
+    overflow-y: hidden;
+}
+
+.calendar-list .time {
+    font-weight: normal;
+    font-size: smaller;
+}
+
+.calendar-list .location {
+    font-weight: normal;
+    font-size: smaller;
+    color: var(--light-blue)
+}
+
+.calendar-list .title {
     font-weight: 700;
-    margin-right: 6px;
 }
 
-.list .title {}
-
-.list .location {
-    opacity: 0.9;
-}
-
-.day {
-    margin-bottom: 6px;
-}
-
-.day-label {
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-
-.muted {
-    opacity: 0.9;
+.calendar-list .description {
+    font-weight: normal;
+    font-size: smaller;
 }
 
 /* Icons */

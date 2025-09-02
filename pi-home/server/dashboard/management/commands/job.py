@@ -6,6 +6,7 @@ import dashboard.jobs.classify
 import dashboard.jobs.dummy_job
 import dashboard.jobs.generate_variant
 import dashboard.jobs.get_weather
+import dashboard.jobs.calendar
 
 from typing import cast, Dict, Any
 import json

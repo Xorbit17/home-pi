@@ -12,4 +12,4 @@ pydantic
 psutil
 docker
 requests
-
+ics

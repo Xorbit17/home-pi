@@ -16,7 +16,7 @@
 <body>
     <div class="dashboard-container">
         <main class="grid">
-            {% if header %}{% include "dashboard/partials/header.html" with header=header alerts=alerts %}{% endif %}
+            {% if header %}{% include "dashboard/partials/header.html" with header=header %}{% endif %}
             {% if weather %}{% include "dashboard/partials/weather.html" with weather=weather %}{% endif %}
             {% if disks %}{% include "dashboard/partials/disks.html" with disks=disks %}{% endif %}
             {% if stats.memory %}{% include "dashboard/partials/stat_graph.html" with stats=stats.memory %}{% endif %}
@@ -24,7 +24,8 @@
             {% if stats.network %}{% include "dashboard/partials/stat_graph.html" with stats=stats.network %}{% endif %}
             {% comment %} {% include "dashboard/partials/transmission.html" %} {% endcomment %}
             {% if docker %}{% include "dashboard/partials/docker.html" with docker=docker%}{% endif %}
-            {% comment %} {% include "dashboard/partials/calendar.html" with calendar=calendar%} {% endcomment %}
+            {% if calendar %}{% include "dashboard/partials/calendar.html" with celandar=calendar%}{% endif %}
+            
         </main>
     </div>
     <script src="{% static 'js/dashboard.js' %}"></script>
