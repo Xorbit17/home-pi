@@ -1,22 +1,24 @@
 :root {
     /*E-ink optimised*/
-    --red: rgb(156,72,75);
-    --green: rgb(58,91,70);
-    --blue: rgb(61,59,94);
-    --yellow: rgb(208,190,71);
-    --orange: rgb(185,118,110);
-    --purple: rgb(109,66,85);
-    --black: rgb(0,0,0);
-    --white: rgb(255,255,255);
-    --dark-grey: rgb(81,82,83);
-    --grey: rgb(161,164,165);
-    --light-grey: rgb(208,210,210);
-    --light-blue: rgb(158,157,175);
+    --red: rgb(156, 72, 75);
+    --green: rgb(58, 91, 70);
+    --blue: rgb(61, 59, 94);
+    --yellow: rgb(208, 190, 71);
+    --orange: rgb(185, 118, 110);
+    --purple: rgb(109, 66, 85);
+    --black: rgb(0, 0, 0);
+    --white: rgb(255, 255, 255);
+    --dark-grey: rgb(81, 82, 83);
+    --grey: rgb(161, 164, 165);
+    --very-light-grey: rgb(242, 242, 242);
+    --light-grey: rgb(208, 210, 210);
+    --light-blue: rgb(158, 157, 175);
 
     --accent: var(--blue);
     --accent-bg: var(--ligt-blue);
 
-    --bg: rgb(242,242,242); /* very light grey, keep as-is */
+    --bg: var(--very-light-grey);
+    /* very light grey, keep as-is */
     --bg-card: var(--white);
     --border: var(--black);
     --border-medium: var(--dark-grey);
@@ -24,8 +26,8 @@
 
     --screen-width: 1200px;
     --screen-height: 1600px;
-    --unit-height: calc( 100vh / 16 );
-    --half-width: calc( var(--screen-width) /2 );
+    --unit-height: calc(100vh / 16);
+    --half-width: calc(var(--screen-width) /2);
 }
 
 /* Typography */
@@ -77,47 +79,47 @@ body {
 }
 
 .header {
-    flex: 0 1 calc( var(--screen-width) - 24px);
+    flex: 0 1 calc(var(--screen-width) - 24px);
     height: var(--unit-height);
 }
 
 .weather {
-    flex: 0 1 calc( var(--screen-width) - 24px);
-    height: calc(var(--unit-height) * 4);
+    flex: 0 1 calc(var(--screen-width) - 24px);
+    height: calc(var(--unit-height) * 3);
 }
 
 .memory {
-    flex: 0 1 calc( var(--half-width) - 24px);
+    flex: 0 1 calc(var(--half-width) - 24px);
     height: calc(var(--unit-height) * 3);
 }
 
 .cpu {
-    flex: 0 1 calc( var(--half-width) - 24px);
+    flex: 0 1 calc(var(--half-width) - 24px);
     height: calc(var(--unit-height) * 3);
 }
 
 .network {
-    flex: 0 1 calc( var(--half-width) - 24px);
+    flex: 0 1 calc(var(--half-width) - 24px);
     height: calc(var(--unit-height) * 3);
 }
 
 .disk {
-    flex: 0 1 calc( var(--half-width) - 24px);
-    height: calc(var(--unit-height) * 3);
+    flex: 0 1 calc(var(--half-width) - 24px);
+    height: calc(var(--unit-height) * 2);
 }
 
 .docker {
-    flex: 0 1 calc( var(--half-width) - 24px);
+    flex: 0 1 calc(var(--half-width) - 24px);
     height: calc(var(--unit-height) * 3);
 }
 
 .calendar {
-    flex: 0 1 calc( var(--half-width) - 24px);
-    height: calc(var(--unit-height) * 6);
+    flex: 0 1 calc(var(--half-width) - 24px);
+    height: calc(var(--unit-height) * 5);
 }
 
 .transmission {
-    flex: 0 1 calc( var(--half-width) - 24px);
+    flex: 0 1 calc(var(--half-width) - 24px);
     height: calc(var(--unit-height) * 3);
 }
 
@@ -149,7 +151,7 @@ body {
 
 .disk-size-label {
     color: var(--dark-grey);
-    font-size:smaller;
+    font-size: smaller;
 }
 
 .meta {
@@ -234,13 +236,13 @@ body {
     justify-content: space-around;
 }
 
-.weather-cards > .weather-card {
+.weather-cards>.weather-card {
     padding-right: 12px;
     margin-right: 12px;
     border-right: 2px dashed var(--border-light);
 }
 
-.weather-cards > .weather-card:last-child {
+.weather-cards>.weather-card:last-child {
     padding-right: 0px;
     margin-right: 0px;
     border-right: 0px;
@@ -265,16 +267,17 @@ body {
     margin-bottom: 4px;
     text-align: center;
 }
-.wc-summary {
-    margin-top:16px;
-    margin-bottom: 4px;
-    text-align: center;
 
+.wc-summary {
+    margin-top: 16px;
+    margin-bottom: 0px;
+    text-align: center;
+    font-size: smaller;
 }
 
 .wc-card-container {
     display: grid;
-    grid-template-areas: 
+    grid-template-areas:
         "wc-icon wc-icon wc-icon wc-icon wc-icon wc-wind"
         "wc-icon wc-icon wc-icon wc-icon wc-icon wc-rain"
         "wc-temp wc-temp wc-temp wc-feel wc-feel wc-feel";
@@ -283,20 +286,23 @@ body {
 .wc-icon {
     grid-area: wc-icon;
 }
+
 .wc.wind {
     grid-area: wc-wind;
 }
+
 .wc-rain {
     grid-area: wc-rain;
     font-size: small;
 }
+
 .wc-temp {
     grid-area: wc-temp;
 }
 
 .wc-feel {
     grid-area: wc-feel;
-    margin-left:8px;
+    margin-left: 8px;
 }
 
 .wc-extra {
@@ -304,7 +310,7 @@ body {
 }
 
 .wc-avg-min-max {
-    display:flex;
+    display: flex;
     align-items: center;
     justify-content: flex-start;
 }
@@ -316,12 +322,12 @@ body {
     margin-right: 8px;
 }
 
-.wc-avg-min-max  .min  {
+.wc-avg-min-max .min {
     font-size: small;
     color: var(--blue);
 }
 
-.wc-avg-min-max  .max  {
+.wc-avg-min-max .max {
     font-size: small;
     color: var(--red);
 }
@@ -339,7 +345,7 @@ body {
 
 .wc-feels-like {
     color: var(--dark-grey);
-    font-size:smaller;
+    font-size: smaller;
 }
 
 .wc-feels-avg {
@@ -399,14 +405,14 @@ body {
     min-width: 0;
 }
 
-.disk-item > .disk-canvas {
+.disk-item>.disk-canvas {
     flex: 0 1 50%;
-    max-height:128px;
-    max-width:128px;
+    max-height: 128px;
+    max-width: 128px;
     aspect-ratio: 1;
 }
 
-.disk-item > .disk-info {
+.disk-item>.disk-info {
     flex: 0 0 50%;
 }
 
@@ -425,15 +431,17 @@ body {
     width: 100%;
 
 }
+
 .stat-graph-item {
     display: block;
     flex: 1 0 50%;
 }
 
 .stat-graph-canvas {
-  display: block;
-  width: 100% !important;   /* beat Chart.js inline width */
-  height: 100% !important;
+    display: block;
+    width: 100% !important;
+    /* beat Chart.js inline width */
+    height: 100% !important;
 }
 
 /* Tables */
@@ -494,57 +502,84 @@ body {
 }
 
 /* Calendar */
+/* Calendar */
 .calendar .calendar-block {
     margin-bottom: 10px;
 }
 
 .calendar h3 {
-    margin: 6px 0 0px;
-    font-size:medium;
+    margin: 6px 0 0;
+    font-size: medium;
     font-weight: bolder;
     border-bottom: 2px solid var(--border-light);
 }
 
+/* One grid for the whole list: first column fits widest .time */
 .calendar-list {
     list-style: none;
     padding: 0;
     margin: 0;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    /* “tab stop” + flexible content */
 }
 
-.calendar-list li.line {
-    padding: 0px 8px 0px 0px;
-    border-bottom: 2px dashed var(--border-light);
+/* Flatten rows so children participate in the parent grid */
+.calendar-list li,
+.calendar-list li h4 {
+    display: contents;
 }
 
-.calendar-list li.line:last-child {
-    padding: 0px 8px 8px 0px;
-    border-bottom: 0px;
-}
-
-.calendar-list h4 {
-    padding: 0px;
-    margin: 0px;
-    overflow-y: hidden;
-}
-
+/* First column: all times share the same track width */
 .calendar-list .time {
+    grid-column: 1;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    /* aligns digits nicely */
+    padding-right:8px;
     font-weight: normal;
     font-size: smaller;
+    align-self: baseline;
 }
 
-.calendar-list .location {
-    font-weight: normal;
-    font-size: smaller;
-    color: var(--light-blue)
+/* Second column: title + optional location on the same line */
+.calendar-list .meta {
+    grid-column: 2;
+    min-width: 0;
+    /* allow wrapping */
+    align-self: baseline;
 }
 
 .calendar-list .title {
     font-weight: 700;
 }
 
-.calendar-list .description {
+.calendar-list .location {
+    margin-left: .4rem;
     font-weight: normal;
     font-size: smaller;
+    color: var(--light-blue);
+}
+
+/* Description sits indented under column 2 */
+.calendar-list .description {
+    grid-column: span 2;
+    font-weight: normal;
+    font-size: smaller;
+    margin-top: 0.1rem;
+}
+
+/* Row rule spanning both columns (replaces li borders) */
+.calendar-list .rule {
+    grid-column: 1 / -1;
+    border-bottom: 2px dashed var(--border-light);
+    margin: 2px 0 6px;
+    /* similar spacing to your old .line padding */
+}
+
+/* Hide the last rule in each list */
+.calendar-list .rule:last-child {
+    display: none;
 }
 
 /* Icons */
@@ -579,12 +614,29 @@ body {
     vertical-align: middle;
 }
 
-.icon-red { color: var(--red) }
-.icon-green { color: var(--green) }
-.icon-blue { color: var(--blue) }
-.icon-yellow { color: var(--yellow-dark-50) }
-.icon-grey { color: var(--grey) }
-.icon-orange { color: var(--orange) }
+.icon-red {
+    color: var(--red)
+}
+
+.icon-green {
+    color: var(--green)
+}
+
+.icon-blue {
+    color: var(--blue)
+}
+
+.icon-yellow {
+    color: var(--yellow-dark-50)
+}
+
+.icon-grey {
+    color: var(--grey)
+}
+
+.icon-orange {
+    color: var(--orange)
+}
 
 
 

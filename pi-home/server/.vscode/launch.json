@@ -6,11 +6,11 @@
       "type": "debugpy",
       "request": "launch",
       "program": "${workspaceFolder}/manage.py",
-      // "args": [
-      //   "job",
-      //   "CALENDAR"
-      // ],
-      "args": ["runserver"],
+      "args": [
+        "job",
+        "DASHBOARD"
+      ],
+      // "args": ["runserver"],
       "django": true,
       "cwd": "${workspaceFolder}",
       "console": "integratedTerminal"

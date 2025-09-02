@@ -29,7 +29,34 @@ NATIVE_COLORS = [
     (61, 59, 94), # Blue
     (58, 91, 70), # green
     (255, 255, 255) # white
-] 
+]
+EXTENDED_COLORS = [
+    # --- Greyscale ---
+    (81, 82, 83),      # dark grey
+    (208, 210, 210),   # light grey
+    (242, 242, 242),    # very light grey
+
+    # --- Yellow variants ---
+    (120, 110, 40),    # dark yellow / ochre
+    (240, 220, 130),   # light yellow
+
+    # --- Red variants ---
+    (109, 66, 85),     # dark red / purple-red
+    (200, 120, 120),   # light red / pinkish
+
+    # --- Blue variants ---
+    (30, 30, 60),      # dark blue / navy
+    (158, 157, 175),   # light blue
+
+    # --- Green variants ---
+    (40, 65, 50),      # dark green / forest
+    (100, 140, 110),   # light green / sage
+
+    # --- Orange / Purple extras ---
+    (128, 118, 110),   # orange / brownish orange
+    (170, 120, 60),    # brighter orange
+    (120, 90, 150),    # purple
+]
 
 NATIVE_PALETTE = {
     "native": NATIVE_COLORS,
@@ -37,17 +64,15 @@ NATIVE_PALETTE = {
 
 NATIVE_PALETTE_SET = extract_rgb_set(NATIVE_PALETTE)
 
+EXTENDED_PALETTE = {
+    "native": NATIVE_COLORS,
+    "extended": EXTENDED_COLORS,
+}
+EXTENDED_PALETTE_SET = extract_rgb_set(EXTENDED_PALETTE)
+
 
 SHADED_PALETTE = {
-    "native": [
-        (0, 0, 0), # black
-        (161, 164, 165), # grey
-        (208, 190, 71), # Yellow
-        (156, 72, 75), # red
-        (61, 59, 94), # Blue
-        (58, 91, 70), # green
-        (255, 255, 255)
-    ],
+    "native": NATIVE_COLORS,
 
     # Neutral greys (helpful for cleaner dithers on faces & text)
     "grayscale": [

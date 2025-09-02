@@ -2,7 +2,7 @@ from django.contrib import admin
 from dashboard.models.photos import SourceImage, Variant
 from dashboard.models.job import Job, Execution, JobLogEntry
 from dashboard.models.weather import Location, WeatherDetail, DayForecast
-from dashboard.models.application import MinuteSystemSample
+from dashboard.models.application import MinuteSystemSample, PrerenderedDashboard
 from dashboard.models.calendar import CalendarSource, CalendarOccurrence
 
 @admin.register(SourceImage)
@@ -77,3 +77,9 @@ class CalendarSourceAdmin(admin.ModelAdmin):
 class CalendarOccurenceAdmin(admin.ModelAdmin):
     list_display = [f.name for f in CalendarOccurrence._meta.fields]
     readonly_fields = ("created_at", "updated_at")
+
+@admin.register(PrerenderedDashboard)
+class PrerenderedDashboardAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in PrerenderedDashboard._meta.fields]
+    readonly_fields = ("created_at", "updated_at")
+

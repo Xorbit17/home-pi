@@ -17,13 +17,15 @@ class CalendarJobParams(BaseModel):
 def get_calendar(_, logger: RunLogger, params=CalendarJobParams):
     logger.info("Starting calendar job")
     start = timezone.now()
-    end = start + timedelta(params.days_ahead) if params.days_ahead is not None else None
+    start_day = start.replace(minute=0, hour=0)
+
+    end = start_day + timedelta(params.days_ahead) if params.days_ahead is not None else None
 
     sources = CalendarSource.objects.filter(active=True)
 
     for source in sources:
         with transaction.atomic():
-            for e in service.get_calendar(source.ics_url, start,end):
+            for e in service.get_calendar(source.ics_url, start_day,end):
                 CalendarOccurrence.objects.update_or_create(
                     source=source,
                     uid=e.uid,

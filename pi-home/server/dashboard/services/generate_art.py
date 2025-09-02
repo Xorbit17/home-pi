@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, List, Sequence, Tuple, Optional, Union, Protocol
+from typing import Dict, Iterable, List, Sequence, Tuple, Optional, Union, Protocol, cast
 from PIL import Image
 from pathlib import Path
 from django.template import Context, Template
@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from pydantic import BaseModel
 from PIL import Image
 from dashboard.services.classify_image import ImageClassification
+from io import BytesIO
 
 RGB = Tuple[int, int, int]
 ART_GENERATOR_PROMPT_TEMPLATE = Template(
@@ -43,8 +44,8 @@ default_logger: Logger = ConsoleLogger()
 
 @dataclass
 class ImageProcessingContext:
-    classification: ImageClassification
-    art_style: ArtStyle
+    classification: ImageClassification | None = None
+    art_style: ArtStyle = "KEEP_PHOTO"
     pipeline: PipelineSteps = field(default_factory=list)
     pipeline_args: PipelineArgs = field(default_factory=list)
     current_arguments: Any = None
@@ -64,6 +65,8 @@ def get_art_instructions_prompt(markdown, *, context: ImageProcessingContext):
     return art_style_readable
 
 def get_content_type_instructions(*, context: ImageProcessingContext):
+    if not context.classification:
+        return RuntimeError("Classification not in context")
     markdown = CONTENT_TYPE_MARKDOWN.get(context.classification.contentType)
     if not markdown:
         raise RuntimeError()
@@ -79,6 +82,8 @@ def get_content_type_instructions(*, context: ImageProcessingContext):
 def openai_process(
     image: Image.Image, markdown_filename, *, context: ImageProcessingContext
 ) -> Image.Image:
+    if not context.classification:
+        raise Exception("Context does not contain classification")
     instructions = get_art_instructions_prompt(
         markdown_filename, context=context
     )
@@ -206,7 +211,7 @@ def _build_P_mode_palette_image(colors: Sequence[RGB]) -> Image.Image:
     return pal
 
 # Pipeline function
-def quantize_to_palette(img: Image.Image, colors: Sequence[RGB]) -> Image.Image:
+def quantize_to_palette(img: Image.Image, colors: Sequence[RGB], *, context: Dict) -> Image.Image:
     """
     Remap `img` to `colors` using Pillow's fixed-palette quantizer (no dithering),
     then convert back to RGB. Keeps everything crisp and returns RGB.
@@ -244,7 +249,7 @@ def get_pipeline_function(functionName: str) -> Callable:
 
 
 def run_art_generation_pipeline(
-    input: Union[Path, str],
+    input: Union[Path, str, bytes],
     output: Union[Path, str],
     context: ImageProcessingContext,
 ) -> None:
@@ -261,12 +266,17 @@ def run_art_generation_pipeline(
     - `pipeline_args[i]` supplies the positional args tuple for `pipeline[i]` (excluding `img`, `context`, and for the
       final step also excluding `output_path`, which is injected here).
     """
-    # Normalize paths
-    in_path = Path(input)
-    out_path = Path(output)
+    def _get_PIL(input: Union[Path, str, bytes]):
+        if isinstance(input, bytes):
+            with BytesIO(input) as bytebuyffer:
+                img = Image.open(bytebuyffer)
+                img.load()
+            return img
+        in_path = Path(cast(Union[str, Path], input))
+        return Image.open(in_path)
 
-    # Load the source image
-    img = Image.open(in_path)
+    out_path = Path(output)
+    img = _get_PIL(input)
 
     if not context.pipeline:
         raise ValueError(
