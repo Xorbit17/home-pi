@@ -2,14 +2,23 @@ from __future__ import annotations
 
 from django.db import models
 from django.utils import timezone
-from dashboard.constants import LOG_LEVEL_CHOICES, JOB_KIND_CHOICES, JOB_STATUS_CHOICES, JOB_TYPE_CHOICES
+from dashboard.constants import (
+    LOG_LEVEL_CHOICES,
+    JOB_KIND_CHOICES,
+    JOB_STATUS_CHOICES,
+    JOB_TYPE_CHOICES,
+    QUEUED,
+    RUNNING,
+)
 
 
 class Job(models.Model):
     name = models.CharField(max_length=120)
     kind = models.CharField(max_length=64, choices=JOB_KIND_CHOICES)
     job_type = models.CharField(max_length=64, choices=JOB_TYPE_CHOICES)
-    cron = models.CharField(max_length=64, help_text="Cron format, e.g. '0 5 * * *'", null=True)
+    cron = models.CharField(
+        max_length=64, help_text="Cron format, e.g. '0 5 * * *'", null=True
+    )
     enabled = models.BooleanField(default=True)
 
     # Optional parameters for the handler
@@ -52,6 +61,10 @@ class Execution(models.Model):
         when = self.started_at.isoformat() if self.started_at else "pending"
         return f"Execution({self.pk}): job={self.job} status={self.status} @ {when}"
 
+
+ACTIVE_STATUSES = [RUNNING, QUEUED]
+
+
 class JobLogEntry(models.Model):
     execution = models.ForeignKey(
         Execution,
@@ -74,4 +87,15 @@ class JobLogEntry(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return f"JobLogEntry({self.pk}): exec:{self.execution} #{self.seq} [{self.level}]"
+        return (
+            f"JobLogEntry({self.pk}): exec:{self.execution} #{self.seq} [{self.level}]"
+        )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["job"],
+                condition=models.Q(status__in=ACTIVE_STATUSES),
+                name="uniq_one_active_exec_per_job",
+            ),
+        ]

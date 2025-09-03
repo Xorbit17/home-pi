@@ -10,6 +10,7 @@ from django.db import models
 from django.utils import timezone
 from zoneinfo import ZoneInfo
 from dashboard.constants import MODE_CHOICES, NEWS_MODE, PHOTO_MODE, WEEKDAY_CHOICES
+from django.contrib.auth.models import User
 
 def _minutes_since_midnight(t: time) -> int:
     return t.hour * 60 + t.minute
@@ -30,18 +31,17 @@ class Display(models.Model):
     You can have multiple with independent schedules.
     """
     name = models.CharField(max_length=100, unique=True)
-    hostname = models.CharField(
-        max_length=255,
-        unique=True,
-        help_text="Pi's hostname used by the device and to identify it when it calls home.",
-    )
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="display")
     host = models.CharField(
         max_length=255,
         help_text="How the server reaches the device, e.g. 'http://hallway-pi:8080' or 'http://192.168.1.52:8080'",
     )
+    mac = models.CharField(max_length=17, unique=True) # Example "6a:6b:9b:a1:cb:38"
+    human_readable_id= models.CharField(max_length=16, unique=True)
     timezone = models.CharField(max_length=64, default="Europe/Brussels")
     default_mode = models.CharField(max_length=16, choices=MODE_CHOICES, default=PHOTO_MODE)
     override_mode = models.CharField(max_length=16, choices=MODE_CHOICES, null=True, default=None)
+    last_seen = models.DateTimeField(null=True) # NULL means display has never connected
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

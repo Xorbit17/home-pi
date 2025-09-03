@@ -37,7 +37,7 @@ def _weighted_choice(items: Iterable[Tuple[Variant, float]]) -> Variant:
 def get_variant():
     qs = Variant.objects.only(
         "id", "path", "score", "favourite", "created_at"
-    ).filter(path__isnull=False)
+    ).filter(path__isnull=False).order_by("-score")[:10000]
     if not qs.exists():
         raise Exception("No images available.")
     

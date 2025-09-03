@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,13 +23,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-^_x1hslj(+$oc&uh-ijzo#k0dls&((zv=63gp4_zhz-b+st+nr'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ["raspberrypi","localhost", "dennisvaneecke.be"]
-CSRF_TRUSTED_ORIGINS = ["https://dennisvaneecke.be", "https://raspberrypi"]
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -38,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'dashboard',
 ]
 
@@ -50,6 +45,15 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",  # no sessions/cookies
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
 
 ROOT_URLCONF = 'pihome.urls'
 
@@ -134,3 +138,15 @@ STATICFILES_DIRS = [
     BASE_DIR / 'dashboard' / 'static',
     # You can add other app-level static directories if needed
 ]
+
+ENV = os.getenv("ENV", "development")  # dev|staging|production
+if not ENV:
+    ENV = "development"
+
+DEBUG = ENV == "development"
+
+DISCOVERY_PORT = int(os.getenv("DISCOVERY_PORT", 51234))
+PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000")
+
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+CSRF_TRUSTED_ORIGINS = [PUBLIC_BASE_URL] if PUBLIC_BASE_URL.startswith("https") else []

@@ -2,6 +2,7 @@ from typing import Callable, Dict, Any, Tuple, Type
 from dashboard.constants import JobKind, RUNNING, QUEUED, MANUAL, CRON
 from dashboard.models.job import Job, Execution
 from django.utils import timezone
+from django.core.exceptions import ObjectDoesNotExist
 
 from datetime import datetime
 from typing import Optional, Dict, cast
@@ -62,16 +63,12 @@ def test_job(jobKind: JobKind, rethrow: bool = False, *, params: Dict[str,Any]):
     return logger
 
 @transaction.atomic
-def start_execution_queued(execution: Execution):
-    if not execution.job and not getattr(execution.job, "kind", False):
-        raise RuntimeError("start_execution_queued must receive an execution with a job eagerly loaded")
+def run_execution(execution: Execution):
+    if not execution.status == RUNNING:
+        raise RuntimeError(f"Execution with id {execution.pk} does not have status set to running")
+    
     job = cast(Job, execution.job)
-    # Only flip to RUNNING if it's still QUEUED (prevents double starts)
-    updated = (Execution.objects
-               .filter(pk=execution.pk, status=QUEUED)
-               .update(status=RUNNING, started_at=timezone.now()))
-    if not updated:
-        return  # someone else started it
+    Execution.objects.filter(pk=execution.pk, status=RUNNING).update(started_at=timezone.now())
     execution.refresh_from_db(fields=["status", "started_at"])
 
     logger = RunLogger(job, execution)

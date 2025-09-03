@@ -1,5 +1,6 @@
 django
 gunicorn
+djangorestframework
 httpx
 icalendar
 recurring-ical-events
