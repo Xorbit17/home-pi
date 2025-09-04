@@ -12,8 +12,6 @@ import dashboard.jobs.generate_dashboard
 from typing import cast, Dict, Any
 import json
 
-
-
 VALID_CHOICES =  [t[0] for t in JOB_KIND_CHOICES]
 
 class Command(BaseCommand):

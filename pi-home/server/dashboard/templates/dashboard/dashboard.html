@@ -2,7 +2,6 @@
 {% load svg %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <title>Home Dashboard</title>
@@ -13,6 +12,7 @@
     {{ stats.cpu|json_script:"cpu-graph-data" }}
     {{ stats.network|json_script:"network-graph-data" }}
     {{ disks|json_script:"disks-graph-data" }}
+</head>
 <body>
     <div class="dashboard-container">
         <main class="grid">

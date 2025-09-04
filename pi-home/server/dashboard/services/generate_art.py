@@ -155,13 +155,24 @@ def resize_crop(image: Image.Image, resolution: Tuple[int,int] | None, *, contex
     return resized.crop((left, top, right, bottom))
 
 # Pipeline function
+def output_bytes(
+    image: Image.Image, format: str, *, context: dict
+) -> BytesIO:
+    buffer = BytesIO()
+    fmt = format.lstrip(".").upper()  # TODO: validation
+    image.save(buffer, format=fmt)
+    buffer.seek(0)
+    return buffer
+
+# Pipeline function
 def output_image(
-    image: Image.Image, output: Path, format: str, *, context: dict
-) -> None:
+    image: Image.Image, output: Path | str, format: str, *, context: dict
+) -> Path:
     output = Path(output)
     fmt = format.lstrip(".").upper()  # TODO: validation
     output.parent.mkdir(parents=True, exist_ok=True)
     image.save(output, format=fmt)
+    return output
 
 
 def noop(image: Image.Image) -> Image.Image:
@@ -239,6 +250,7 @@ PIPELINE_FUNCTIONS: Dict[str,Callable] = {
     "resize_crop": resize_crop,
     "quantize_to_palette": quantize_to_palette,
     "output_image": output_image,
+    "output_bytes": output_bytes,
 }
 
 def get_pipeline_function(functionName: str) -> Callable:
@@ -250,7 +262,7 @@ def get_pipeline_function(functionName: str) -> Callable:
 
 def run_art_generation_pipeline(
     input: Union[Path, str, bytes],
-    output: Union[Path, str],
+    *,
     context: ImageProcessingContext,
 ) -> None:
     """
@@ -275,12 +287,11 @@ def run_art_generation_pipeline(
         in_path = Path(cast(Union[str, Path], input))
         return Image.open(in_path)
 
-    out_path = Path(output)
     img = _get_PIL(input)
 
     if not context.pipeline:
         raise ValueError(
-            "pipeline must contain at least one step (the final saving step)."
+            "pipeline must contain at least one step"
         )
 
     # Run all intermediate steps
@@ -308,8 +319,9 @@ def run_art_generation_pipeline(
         final_args = (final_args,)
     try:
         context.logger.debug(f"Executing final step {final_step_i} (saving) of pipeline")
-        get_pipeline_function(final_step)(img, out_path, *final_args, context=context)
-        context.logger.debug(f"Successfully completed  inal step {final_step_i} (saving) of pipeline")
+        result = get_pipeline_function(final_step)(img, *final_args, context=context)
+        context.logger.debug(f"Successfully completed  final step {final_step_i} (saving) of pipeline")
+        return result
     except Exception as e:
         context.logger.error(f"Last step {final_step_i} (saving) of pipeline FAILED with error: {str(e)}")
         raise

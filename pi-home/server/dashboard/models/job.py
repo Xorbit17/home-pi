@@ -91,11 +91,3 @@ class JobLogEntry(models.Model):
             f"JobLogEntry({self.pk}): exec:{self.execution} #{self.seq} [{self.level}]"
         )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["job"],
-                condition=models.Q(status__in=ACTIVE_STATUSES),
-                name="uniq_one_active_exec_per_job",
-            ),
-        ]

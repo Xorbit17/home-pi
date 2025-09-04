@@ -1,7 +1,6 @@
 import asyncio, json, socket, time
 from datetime import timedelta
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from dashboard.daemon.jobs import job_execution_task
 from dashboard.daemon.display_discovery import udp_discovery_server_task
 from dashboard.daemon.stats import stats_collector_task

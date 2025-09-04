@@ -3,19 +3,23 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, time, timedelta
-from typing import Optional
+from typing import Optional, cast
 
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from zoneinfo import ZoneInfo
-from dashboard.constants import MODE_CHOICES, NEWS_MODE, PHOTO_MODE, WEEKDAY_CHOICES
+from dashboard.constants import MODE_CHOICES, NEWS_MODE, PHOTO_MODE, WEEKDAY_CHOICES, ModeKind
 from django.contrib.auth.models import User
+
+MIDNIGHT = time(0,0,0)
 
 def _minutes_since_midnight(t: time) -> int:
     return t.hour * 60 + t.minute
 
 def _end_minutes(end_t: time) -> int:
+    # Edge case. If end_t is midnight and we are looing for the end time this means
+    # the end of the day, not the beginning
     mins = _minutes_since_midnight(end_t)
     return 24 * 60 if mins == 0 else mins
 
@@ -23,33 +27,35 @@ def _end_minutes(end_t: time) -> int:
 class _Window:
     start_min: int
     end_min: int
-    mode: str
+    mode: ModeKind
 
 class Display(models.Model):
     """
     A physical e-ink frame (or logical display).
     You can have multiple with independent schedules.
     """
-    name = models.CharField(max_length=100, unique=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="display")
     host = models.CharField(
         max_length=255,
         help_text="How the server reaches the device, e.g. 'http://hallway-pi:8080' or 'http://192.168.1.52:8080'",
     )
-    mac = models.CharField(max_length=17, unique=True) # Example "6a:6b:9b:a1:cb:38"
+    hardware_id = models.CharField(max_length=255, unique=True) # Example "6a:6b:9b:a1:cb:38"
     human_readable_id= models.CharField(max_length=16, unique=True)
     timezone = models.CharField(max_length=64, default="Europe/Brussels")
     default_mode = models.CharField(max_length=16, choices=MODE_CHOICES, default=PHOTO_MODE)
     override_mode = models.CharField(max_length=16, choices=MODE_CHOICES, null=True, default=None)
     last_seen = models.DateTimeField(null=True) # NULL means display has never connected
+    x_res = models.PositiveIntegerField()
+    y_res = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = "Display"
         verbose_name_plural = "Displays"
 
     def __str__(self) -> str:
-        return self.name
+        return f"Display with username:'{self.user.username}', and hardware id: '{self.human_readable_id}'. ({self.x_res}x{self.y_res})"
 
     @property
     def tz(self) -> ZoneInfo:
@@ -113,20 +119,20 @@ class WeeklyRule(models.Model):
         for r in rules:
             s = _minutes_since_midnight(r.start_time)
             e = _end_minutes(r.end_time)
-            windows.append(_Window(start_min=s, end_min=e, mode=r.mode))
+            windows.append(_Window(start_min=s, end_min=e, mode=cast(ModeKind,r.mode)))
         return windows
 
     @staticmethod
-    def resolve_mode(display: Display, at: Optional[datetime] = None) -> str:
+    def resolve_mode(display: Display, now: Optional[datetime] = None) -> ModeKind:
         display.clear_expired_override()
 
-        
+        local_now = timezone.localtime() if now is None else timezone.make_aware(now)
+        # In case of override
         if display.override_mode and display.override_expires_at:
-            now_utc = timezone.now()
-            if now_utc < display.override_expires_at:
-                return display.override_mode
 
-        local_now = (at or timezone.now()).astimezone(display.tz)
+            if now < display.override_expires_at:
+                return cast(ModeKind,display.override_mode)
+        # Normal case: schedule
         weekday = local_now.weekday()
         minutes = local_now.hour * 60 + local_now.minute
 
@@ -135,8 +141,8 @@ class WeeklyRule(models.Model):
             if w.start_min <= minutes < w.end_min:
                 return w.mode
 
-        # If nothing matched (e.g., schedule gaps), default
-        return display.default_mode
+        # If nothing matched (e.g., schedule gaps or no schedule), fall back to default
+        return cast(ModeKind,display.default_mode)
 
     @staticmethod
     def next_boundary_for_display(display: Display, now_local: Optional[datetime] = None) -> Optional[datetime]:

@@ -43,10 +43,18 @@ IMAGE_ART_GENERATION_MODEL="gpt-5"
 
 NEWS_MODE = "news"
 PHOTO_MODE = "photo"
+DASHBOARD_MODE = "dashboard"
 
 MODE_CHOICES = [
     (NEWS_MODE, "Newspaper"),
     (PHOTO_MODE, "Photo"),
+    (DASHBOARD_MODE, 'Dashboard')
+]
+
+ModeKind: TypeAlias = Literal[
+    "NEWS_MODE",
+    "PHOTO_MODE",
+    "DASHBOARD_MODE"
 ]
 
 WEEKDAY_CHOICES = [

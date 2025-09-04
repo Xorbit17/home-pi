@@ -4,6 +4,7 @@ from dashboard.models.job import Job, Execution, JobLogEntry
 from dashboard.models.weather import Location, WeatherDetail, DayForecast
 from dashboard.models.application import MinuteSystemSample, PrerenderedDashboard
 from dashboard.models.calendar import CalendarSource, CalendarOccurrence
+from dashboard.models.schedule import Display, WeeklyRule
 
 @admin.register(SourceImage)
 class SourceImageAdmin(admin.ModelAdmin):
@@ -81,5 +82,15 @@ class CalendarOccurenceAdmin(admin.ModelAdmin):
 @admin.register(PrerenderedDashboard)
 class PrerenderedDashboardAdmin(admin.ModelAdmin):
     list_display = [f.name for f in PrerenderedDashboard._meta.fields]
+    readonly_fields = ("created_at", "updated_at")
+
+@admin.register(Display)
+class DisplayAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in Display._meta.fields]
+    readonly_fields = ("created_at", "updated_at")
+
+@admin.register(WeeklyRule)
+class WeeklyRuleAdmin(admin.ModelAdmin):
+    list_display = [f.name for f in WeeklyRule._meta.fields]
     readonly_fields = ("created_at", "updated_at")
 
